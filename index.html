@@ -116,13 +116,29 @@
     <script>
         // წინა ფუნქციები უცვლელია...
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
-            document.getElementById('money').innerText = money.toLocaleString();
-            document.getElementById('hp-fill').style.width = hp + '%';
-            document.getElementById('arm-fill').style.width = arm + '%';
-            document.getElementById('ammo-val').innerText = ammo;
-            document.getElementById('ammo-total').innerText = totalammo;
-        }
+    // ფულის ფორმატირება
+    document.getElementById('money').innerText = money.toLocaleString();
+    
+    // HP და Armor ბარები
+    document.getElementById('hp-fill').style.width = hp + '%';
+    document.getElementById('arm-fill').style.width = arm + '%';
+    
+    // იარაღის ხატულების ლოგიკა (Fist, Pistol, Rifle)
+    let icon = '<i class="fas fa-hand-fist"></i>'; // სტანდარტულად მუშტი
+    if (weaponid >= 22 && weaponid <= 24) icon = '<i class="fas fa-gun"></i>';
+    if (weaponid >= 25 && weaponid <= 34) icon = '<i class="fas fa-person-rifle"></i>';
+    
+    document.getElementById('w-icon').innerHTML = icon;
 
+    // ტყვიების გამოჩენა (თუ მუშტია, არ გამოჩნდეს)
+    if(weaponid == 0) {
+        document.querySelector('.ammo').style.display = "none";
+    } else {
+        document.querySelector('.ammo').style.display = "block";
+        document.getElementById('ammo-val').innerText = ammo;
+        document.getElementById('ammo-total').innerText = totalammo;
+    }
+}
         function updateSpeedo(speed, fuel, veh_hp, in_veh) {
             const box = document.getElementById('speedo-box');
             if(in_veh) {
