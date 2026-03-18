@@ -150,5 +150,13 @@
             }
         }
     </script>
+    // ეს კოდი აკავშირებს SAMP სერვერს და შენს ვებსაიტს
+    cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
+        updateHud(money, hp, arm, weapon, ammo, totalammo);
+    });
+    
+    cef.on("updateSpeedo", (speed, fuel, hp, engine) => {
+        updateSpeedo(speed, fuel, hp, engine);
+    });
 </body>
 </html>
