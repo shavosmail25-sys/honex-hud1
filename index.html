@@ -114,12 +114,11 @@
     <div class="map-frame"></div>
 
     <script>
-        // წინა ფუნქციები უცვლელია...
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
-    // ფულის ფორმატირება
+
     document.getElementById('money').innerText = money.toLocaleString();
     
-    // HP და Armor ბარები
+
     document.getElementById('hp-fill').style.width = hp + '%';
     document.getElementById('arm-fill').style.width = arm + '%';
     
@@ -149,14 +148,43 @@
                 box.style.display = 'none';
             }
         }
+        <script>
+        function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
+            document.getElementById('money').innerText = money.toLocaleString();
+            document.getElementById('hp-fill').style.width = hp + '%';
+            document.getElementById('arm-fill').style.width = arm + '%';
+            
+            let icon = '<i class="fas fa-hand-fist"></i>'; 
+            if (weaponid >= 22 && weaponid <= 24) icon = '<i class="fas fa-gun"></i>';
+            if (weaponid >= 25 && weaponid <= 34) icon = '<i class="fas fa-person-rifle"></i>';
+            
+            document.getElementById('w-icon').innerHTML = icon;
+
+            if(weaponid == 0) {
+                document.querySelector('.ammo').style.display = "none";
+            } else {
+                document.querySelector('.ammo').style.display = "block";
+                document.getElementById('ammo-val').innerText = ammo;
+                document.getElementById('ammo-total').innerText = totalammo;
+            }
+        }
+        function updateSpeedo(speed, fuel, veh_hp, in_veh) {
+            const box = document.getElementById('speedo-box');
+            if(in_veh) {
+                box.style.display = 'block';
+                document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0');
+                document.getElementById('fuel-fill').style.width = fuel + '%';
+            } else {
+                box.style.display = 'none';
+            }
+        }
+        cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
+            updateHud(money, hp, arm, weapon, ammo, totalammo);
+        });
+
+        cef.on("updateSpeedo", (speed, fuel, hp, engine) => {
+            updateSpeedo(speed, fuel, hp, engine);
+        });
     </script>
-    // ეს კოდი აკავშირებს SAMP სერვერს და შენს ვებსაიტს
-    cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
-        updateHud(money, hp, arm, weapon, ammo, totalammo);
-    });
-    
-    cef.on("updateSpeedo", (speed, fuel, hp, engine) => {
-        updateSpeedo(speed, fuel, hp, engine);
-    });
 </body>
 </html>
