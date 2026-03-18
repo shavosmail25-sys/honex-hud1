@@ -9,17 +9,52 @@
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Oswald', sans-serif; background: transparent; }
         
         .server-name {
-            position: absolute; top: 10px; right: 25px;
-            font-family: 'Montserrat', sans-serif; font-size: 16px;
-            background: linear-gradient(180deg, #fff 0%, #aaa 100%);
+            position: absolute; top: 15px; right: 25px;
+            font-family: 'Montserrat', sans-serif; font-size: 18px;
+            background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            transform: skewX(-15deg); letter-spacing: 1px;
+            transform: skewX(-15deg); font-weight: 900;
         }
 
         #hud-container {
-            position: absolute; top: 40px; right: 25px;
+            position: absolute; top: 50px; right: 25px;
             display: flex; flex-direction: column; align-items: flex-end;
             transform: skewX(-15deg);
+        }
+
+        .money-wrapper {
+            font-size: 32px; color: #2ecc71;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.9);
+            margin-bottom: 5px;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        
+        /* ანიმაციის კლასი ფულის მატებისას */
+        .money-update { transform: scale(1.1); color: #27ae60; }
+
+        .stat-item {
+            display: flex; align-items: center; margin-bottom: 5px;
+            background: rgba(0, 0, 0, 0.5); padding: 3px 10px;
+        }
+
+        .bar-bg { width: 150px; height: 8px; background: rgba(255,255,255,0.1); overflow: hidden; }
+        .fill { height: 100%; transition: width 0.5s ease-in-out; }
+        #hp-fill { background: linear-gradient(90deg, #d31027, #ea384d); }
+        #arm-fill { background: linear-gradient(90deg, #2b5876, #4e4376); }
+
+        /* რუკის ჩარჩო - გასწორებული კოორდინატები */
+        .map-frame {
+            position: absolute; 
+            bottom: 24px; /* აწეულია ზუსტად რუკის სიმაღლეზე */
+            left: 24px;   /* შეწეულია რუკის კიდესთან */
+            width: 155px; 
+            height: 105px;
+            border: 3px solid rgba(0, 0, 0, 0.8);
+            border-radius: 2px;
+            background: transparent;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         .weapon-box {
@@ -30,44 +65,14 @@
         .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
         .ammo { font-size: 14px; color: #f39c12; }
 
-        .money-wrapper {
-            font-size: 28px; color: #2ecc71;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.9);
-            margin-bottom: 5px;
-        }
-
-        .stat-item {
-            display: flex; align-items: center; margin-bottom: 5px;
-            background: rgba(0, 0, 0, 0.5); padding: 3px 10px;
-            border-right: 3px solid rgba(255,255,255,0.2);
-        }
-
-        .bar-bg { width: 150px; height: 8px; background: rgba(255,255,255,0.1); overflow: hidden; }
-        .fill { height: 100%; transition: width 0.5s ease-in-out; }
-        
-        #hp-fill { background: linear-gradient(90deg, #d31027, #ea384d); }
-        #arm-fill { background: linear-gradient(90deg, #2b5876, #4e4376); }
-
-        .map-frame {
-        position: absolute; 
-        bottom: 25px; /* აწევა ქვემოდან */
-        left: 28px;   /* შეწევა გვერდიდან */
-        width: 172px; 
-        height: 115px;
-        border: 2px solid rgba(0, 0, 0, 0.8);
-        background: transparent; /* რუკა რომ გამოჩნდეს */
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-
         #speedo-box {
             position: absolute; bottom: 20px; right: 25px;
-            transform: skewX(-15deg);
+            transform: skewX(-15deg); display: none;
         }
         .speedo-content {
             background: rgba(0,0,0,0.6); padding: 10px;
-            border-right: 4px solid #f1c40f; display: flex; align-items: flex-end;
+            border-right: 4px solid #f1c40f;
         }
-        #speed-val { font-size: 32px; color: #fff; line-height: 28px; }
     </style>
 </head>
 <body>
@@ -78,49 +83,59 @@
             <div id="w-icon" class="weapon-icon"><i class="fas fa-hand-fist"></i></div>
             <div class="ammo"><span id="ammo-val">0</span>/<span id="ammo-total">0</span></div>
         </div>
-
-        <div class="money-wrapper">
-            <span style="color: #fff; font-size: 18px;">$</span> <span id="money">0</span>
-        </div>
-
-        <div class="stat-item">
-            <i class="fas fa-heart" style="color: #ff4d4d; font-size: 10px; margin-right: 8px; transform: skewX(15deg);"></i>
-            <div class="bar-bg"><div id="hp-fill" class="fill"></div></div>
-        </div>
-
-        <div class="stat-item">
-            <i class="fas fa-shield-halved" style="color: #4facfe; font-size: 10px; margin-right: 8px; transform: skewX(15deg);"></i>
-            <div class="bar-bg"><div id="arm-fill" class="fill"></div></div>
-        </div>
-    </div>
-
-    <div id="speedo-box" style="display: none;">
-        <div class="speedo-content">
-            <div style="text-align: center; margin-right: 15px;">
-                <div id="speed-val">000</div>
-                <div style="font-size: 10px; color: #f1c40f;">KM/H</div>
-            </div>
-            <div style="width: 80px;">
-                <div style="font-size: 9px; color: #aaa;">FUEL</div>
-                <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin-bottom: 5px;">
-                    <div id="fuel-fill" style="width: 100%; height: 100%; background: #2ecc71;"></div>
-                </div>
-            </div>
-        </div>
+        <div class="money-wrapper" id="money-cont">$ <span id="money">0</span></div>
+        <div class="stat-item"><div class="bar-bg"><div id="hp-fill" class="fill"></div></div></div>
+        <div class="stat-item"><div class="bar-bg"><div id="arm-fill" class="fill"></div></div></div>
     </div>
 
     <div class="map-frame"></div>
+    <div id="speedo-box"><div class="speedo-content"><div id="speed-val" style="font-size: 32px; color: #fff;">000</div></div></div>
 
     <script>
+        // GTA ჰუდის კომპონენტების დამალვა
+        cef.emit("game:hud:setComponentVisible", 2, false); 
+        cef.emit("game:hud:setComponentVisible", 3, false); 
+        cef.emit("game:hud:setComponentVisible", 4, false); 
+        cef.emit("game:hud:setComponentVisible", 18, false);
+
+        let currentMoney = 0;
+
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
-            document.getElementById('money').innerText = money.toLocaleString();
+            const moneyElem = document.getElementById('money');
+            const moneyCont = document.getElementById('money-cont');
+
+            // ფულის ანიმაცია: თუ ფული შეიცვალა
+            if (money !== currentMoney) {
+                moneyCont.classList.add('money-update');
+                
+                // რიცხვების "რბოლის" ეფექტი
+                let start = currentMoney;
+                let end = money;
+                let duration = 500;
+                let startTime = null;
+
+                function animate(currentTime) {
+                    if (!startTime) startTime = currentTime;
+                    let progress = currentTime - startTime;
+                    let val = Math.floor(start + (end - start) * (progress / duration));
+                    moneyElem.innerText = val.toLocaleString();
+                    if (progress < duration) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        moneyElem.innerText = end.toLocaleString();
+                        moneyCont.classList.remove('money-update');
+                    }
+                }
+                requestAnimationFrame(animate);
+                currentMoney = money;
+            }
+
             document.getElementById('hp-fill').style.width = hp + '%';
             document.getElementById('arm-fill').style.width = arm + '%';
             
             let icon = '<i class="fas fa-hand-fist"></i>'; 
             if (weaponid >= 22 && weaponid <= 24) icon = '<i class="fas fa-gun"></i>';
             if (weaponid >= 25 && weaponid <= 34) icon = '<i class="fas fa-person-rifle"></i>';
-            
             document.getElementById('w-icon').innerHTML = icon;
 
             if(weaponid == 0) {
@@ -134,13 +149,8 @@
 
         function updateSpeedo(speed, fuel, veh_hp, in_veh) {
             const box = document.getElementById('speedo-box');
-            if(in_veh) {
-                box.style.display = 'block';
-                document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0');
-                document.getElementById('fuel-fill').style.width = fuel + '%';
-            } else {
-                box.style.display = 'none';
-            }
+            box.style.display = in_veh ? 'block' : 'none';
+            if(in_veh) document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0');
         }
 
         cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
