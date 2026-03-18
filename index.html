@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Oswald', sans-serif; background: transparent; }
+        
+        /* სერვერის სახელი - უფრო პატარა */
+        .server-name {
+            position: absolute; top: 10px; right: 25px;
+            font-family: 'Montserrat', sans-serif; font-size: 16px; /* 24-დან 16-მდე */
+            background: linear-gradient(180deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            transform: skewX(-15deg); letter-spacing: 1px;
+        }
+
+        #hud-container {
+            position: absolute; top: 40px; right: 25px;
+            display: flex; flex-direction: column; align-items: flex-end;
+            transform: skewX(-15deg);
+        }
+
+        /* იარაღი - უფრო კომპაქტური */
+        .weapon-box {
+            background: rgba(0, 0, 0, 0.6); padding: 5px 12px;
+            border-left: 3px solid #f39c12; margin-bottom: 8px;
+            display: flex; align-items: center;
+        }
+        .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
+        .ammo { font-size: 14px; color: #f39c12; }
+
+        /* ფული - შემცირებული ზომა */
+        .money-wrapper {
+            font-size: 28px; color: #2ecc71; /* 45-დან 28-მდე */
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.9);
+            margin-bottom: 5px;
+        }
+
+        .stat-item {
+            display: flex; align-items: center; margin-bottom: 5px;
+            background: rgba(0, 0, 0, 0.5); padding: 3px 10px;
+            border-right: 3px solid rgba(255,255,255,0.2);
+        }
+
+        /* ბარების სიგრძე - 220-დან 150-მდე */
+        .bar-bg { width: 150px; height: 8px; background: rgba(255,255,255,0.1); overflow: hidden; }
+        .fill { height: 100%; transition: width 0.5s ease-in-out; }
+        
+        #hp-fill { background: linear-gradient(90deg, #d31027, #ea384d); }
+        #arm-fill { background: linear-gradient(90deg, #2b5876, #4e4376); }
+
+        /* რუკის ჩარჩო - უფრო პატარა */
+        .map-frame {
+            position: absolute; bottom: 20px; left: 20px;
+            width: 160px; height: 110px; /* 200x150-დან 160x110-მდე */
+            border: 3px solid rgba(0, 0, 0, 0.6);
+            background: rgba(0,0,0,0.1);
+        }
+
+        /* სპიდომეტრი - კომპაქტური */
+        #speedo-box {
+            position: absolute; bottom: 20px; right: 25px;
+            transform: skewX(-15deg);
+        }
+        .speedo-content {
+            background: rgba(0,0,0,0.6); padding: 10px;
+            border-right: 4px solid #f1c40f; display: flex; align-items: flex-end;
+        }
+        #speed-val { font-size: 32px; color: #fff; line-height: 28px; }
+    </style>
+</head>
+<body>
+    <div class="server-name">HONEX ROLE PLAY</div>
+
+    <div id="hud-container">
+        <div class="weapon-box">
+            <div id="w-icon" class="weapon-icon"><i class="fas fa-gun"></i></div>
+            <div class="ammo"><span id="ammo-val">0</span>/<span id="ammo-total">0</span></div>
+        </div>
+
+        <div class="money-wrapper">
+            <span style="color: #fff; font-size: 18px;">$</span> <span id="money">0</span>
+        </div>
+
+        <div class="stat-item">
+            <i class="fas fa-heart" style="color: #ff4d4d; font-size: 10px; margin-right: 8px; transform: skewX(15deg);"></i>
+            <div class="bar-bg"><div id="hp-fill" class="fill"></div></div>
+        </div>
+
+        <div class="stat-item">
+            <i class="fas fa-shield-halved" style="color: #4facfe; font-size: 10px; margin-right: 8px; transform: skewX(15deg);"></i>
+            <div class="bar-bg"><div id="arm-fill" class="fill"></div></div>
+        </div>
+    </div>
+
+    <div id="speedo-box">
+        <div class="speedo-content">
+            <div style="text-align: center; margin-right: 15px;">
+                <div id="speed-val">000</div>
+                <div style="font-size: 10px; color: #f1c40f;">KM/H</div>
+            </div>
+            <div style="width: 80px;">
+                <div style="font-size: 9px; color: #aaa;">FUEL</div>
+                <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin-bottom: 5px;">
+                    <div id="fuel-fill" style="width: 100%; height: 100%; background: #2ecc71;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="map-frame"></div>
+
+    <script>
+        // წინა ფუნქციები უცვლელია...
+        function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
+            document.getElementById('money').innerText = money.toLocaleString();
+            document.getElementById('hp-fill').style.width = hp + '%';
+            document.getElementById('arm-fill').style.width = arm + '%';
+            document.getElementById('ammo-val').innerText = ammo;
+            document.getElementById('ammo-total').innerText = totalammo;
+        }
+
+        function updateSpeedo(speed, fuel, veh_hp, in_veh) {
+            const box = document.getElementById('speedo-box');
+            if(in_veh) {
+                box.style.display = 'block';
+                document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0');
+                document.getElementById('fuel-fill').style.width = fuel + '%';
+            } else {
+                box.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
