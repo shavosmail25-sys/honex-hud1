@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            margin: 0; padding: 0; overflow: hidden; background: transparent; 
+            font-family: 'Noto Sans Georgian', sans-serif;
+        }
+        
+        /* ჩატის კონტეინერი - უფრო პატარა და კომპაქტური */
+        #chat-container {
+            position: absolute; top: 20px; left: 20px;
+            width: 450px; /* დავაპატარავეთ სიგანე */
+            pointer-events: none;
+        }
+
+        /* მესიჯების ბლოკი მუქი ფონით */
+        .chat-messages {
+            background: rgba(0, 0, 0, 0.4); /* უკანა შავი ფონი */
+            border-radius: 4px;
+            padding: 5px;
+            display: flex; flex-direction: column;
+            max-height: 220px;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .message {
+            font-size: 13px; /* უფრო პატარა შრიფტი */
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0,0,0,1);
+            margin-bottom: 2px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        /* წერის ველი (Input) - გამოკვეთილი "დაფა" */
+        .chat-input-box {
+            margin-top: 5px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8); /* მუქი დაფა */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 3px solid #f1c40f; /* ოქროსფერი ხაზი მარცხნივ */
+            padding: 6px 10px; 
+            display: none; /* თავიდან დამალულია */
+            pointer-events: auto;
+            box-sizing: border-box;
+        }
+
+        #chat-input {
+            width: 100%; background: transparent; border: none;
+            color: white; outline: none; font-size: 13px;
+            font-family: 'Noto Sans Georgian', sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <div id="messages" class="chat-messages">
+            </div>
+        <div id="input-box" class="chat-input-box">
+            <input type="text" id="chat-input" placeholder="დაწერეთ შეტყობინება..." maxlength="128">
+        </div>
+    </div>
+
+    <script>
+        const messagesCont = document.getElementById('messages');
+        const inputBox = document.getElementById('input-box');
+        const inputField = document.getElementById('chat-input');
+
+        function addMessage(text) {
+            const msg = document.createElement('div');
+            msg.className = 'message';
+            msg.innerHTML = text; 
+            messagesCont.appendChild(msg);
+
+            if (messagesCont.childNodes.length > 12) {
+                messagesCont.removeChild(messagesCont.firstChild);
+            }
+        }
+
+        // ტესტ მესიჯები ბრაუზერისთვის
+        addMessage("<span style='color:#f1c40f'>Admin_Honex:</span> ჩატი გასწორდა, არის უფრო პატარა.");
+        addMessage("<span style='color:#ffffff'>Player:</span> უკანა ფონიც აქვს და წერის დაფაც.");
+
+        // კლავიატურის ფუნქციები
+        window.addEventListener("keydown", function(event) {
+            // T - გახსნა
+            if (event.keyCode === 84 && inputBox.style.display === "none") {
+                event.preventDefault();
+                inputBox.style.display = "block";
+                setTimeout(() => inputField.focus(), 10);
+                if(typeof cef !== 'undefined') cef.set_focus(true);
+            }
+
+            // Enter - გაგზავნა
+            if (event.keyCode === 13 && inputBox.style.display === "block") {
+                let val = inputField.value;
+                if(val.trim().length > 0) {
+                    if(typeof cef !== 'undefined') cef.emit("server:processChat", val);
+                    else addMessage("<span style='color:#2ecc71'>შენ:</span> " + val);
+                }
+                inputField.value = "";
+                inputBox.style.display = "none";
+                if(typeof cef !== 'undefined') cef.set_focus(false);
+            }
+
+            // Escape - დახურვა
+            if (event.keyCode === 27 && inputBox.style.display === "block") {
+                inputBox.style.display = "none";
+                if(typeof cef !== 'undefined') cef.set_focus(false);
+            }
+        });
+
+        // CEF მოვლენები
+        if(typeof cef !== 'undefined') {
+            cef.on("chat:push", (text) => addMessage(text));
+            cef.on("chat:toggle", (state) => {
+                inputBox.style.display = state ? "block" : "none";
+                if(state) {
+                    setTimeout(() => inputField.focus(), 10);
+                    cef.set_focus(true);
+                } else {
+                    cef.set_focus(false);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
