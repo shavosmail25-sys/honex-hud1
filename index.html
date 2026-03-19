@@ -15,6 +15,7 @@
             background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             transform: skewX(-15deg); font-weight: 900;
+            z-index: 100;
         }
 
         #hud-container {
@@ -46,22 +47,46 @@
         .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
         .ammo { font-size: 14px; color: #f39c12; }
 
-        /* === Gift HUD (საჩუქარი) === */
+        /* === მოდერნიზებული Gift HUD (საჩუქარი) - ახალი პოზიცია ლოგოს მარცხნივ === */
         #gift-container {
             position: absolute;
-            bottom: 23vh; 
-            left: 1%;
-            display: none; 
+            top: 15px; /* Aligned vertically with logo */
+            right: 230px; /* Estimated width of logo (25px offset + ~180px text + 25px gap) */
+            display: none; /* Controlled by JS/CEF */
             align-items: center;
-            background: rgba(20, 20, 20, 0.8);
-            border-left: 4px solid #f1c40f;
-            padding: 8px 15px;
-            transform: skewX(-15deg);
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.7); /* Mat m dark background */
+            border: 1px solid rgba(241, 196, 15, 0.4); /* Subtle yellow border */
+            padding: 4px 15px;
+            border-radius: 4px;
+            transform: skewX(-15deg); /* Slant matching logo */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            z-index: 101; /* Ensure above standard HUD if needed */
         }
-        .gift-icon { color: #f1c40f; font-size: 20px; margin-right: 10px; transform: skewX(15deg); animation: pulse 1.5s infinite; }
-        .gift-time { color: #fff; font-size: 16px; font-weight: bold; transform: skewX(15deg); text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
-        @keyframes pulse { 0% { transform: skewX(15deg) scale(1); } 50% { transform: skewX(15deg) scale(1.1); } 100% { transform: skewX(15deg) scale(1); } }
+
+        .gift-icon {
+            color: #f1c40f; /* Yellow matching logo accent */
+            font-size: 16px;
+            margin-right: 10px;
+            transform: skewX(15deg); /* Un-slant the icon itself so it looks normal */
+            filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5)); /* Slight glow */
+        }
+
+        .gift-time {
+            color: #fff;
+            font-family: 'Oswald', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            transform: skewX(15deg); /* Un-slant the text */
+            letter-spacing: 1px;
+        }
+
+        @keyframes pulse {
+            0% { filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5)); }
+            50% { filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.8)); }
+            100% { filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5)); }
+        }
+        /* Apllying pulse only to the modern icon glow */
+        #gift-container .gift-icon { animation: pulse 1.5s infinite; }
 
         /* === სპიდომეტრი === */
         #speedo-box {
@@ -128,11 +153,12 @@
                 updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh);
             });
 
+            // Gift ივენთი (მუშაობს დინამიკურად, თუ სერვერი ყოველ წამს აგზავნის ახალ დროს)
             cef.on("updateGift", (timeStr, isVisible) => {
                 const giftCont = document.getElementById('gift-container');
                 if(isVisible) {
                     giftCont.style.display = 'flex';
-                    document.getElementById('gift-val').innerText = timeStr;
+                    document.getElementById('gift-val').innerText = timeStr; // აჩვენებს სერვერიდან მოსულ "00:00:15" ფორმატს
                 } else { giftCont.style.display = 'none'; }
             });
         }
