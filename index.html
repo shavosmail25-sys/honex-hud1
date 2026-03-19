@@ -41,17 +41,14 @@
         #hp-fill { background: linear-gradient(90deg, #d31027, #ea384d); width: 100%; } 
         #arm-fill { background: linear-gradient(90deg, #2b5876, #4e4376); width: 0%; } 
 
-        /* ============================ */
-        /* == რუკის ჩარჩო (გასწორებული) == */
-        /* ============================ */
         .map-frame {
             position: absolute; 
-            bottom: 3.5%; /* პოზიცია ქვემოდან */
-            left: 1%;   /* პოზიცია მარცხნიდან */   
-            width: 14vw;  /* სიგანე ეკრანის პროპორციულად */
-            height: 18vh; /* სიმაღლე ეკრანის პროპორციულად */
-            border: 2px solid rgba(0, 0, 0, 0.9); /* ჩარჩო */
-            border-radius: 4px; /* მცირედი დამრგვალება */
+            bottom: 3.5%; 
+            left: 1%;   
+            width: 14vw;  
+            height: 18vh; 
+            border: 2px solid rgba(0, 0, 0, 0.9); 
+            border-radius: 4px; 
             background: transparent;
             z-index: 10;
             pointer-events: none;
@@ -66,39 +63,53 @@
         .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
         .ammo { font-size: 14px; color: #f39c12; }
 
-        /* ============================== */
-        /* == სპიდომეტრი (ახალი დიზაინი) == */
-        /* ============================== */
+        /* Kotha Speedometer CSS */
         #speedo-box {
             position: absolute; 
-            bottom: 30px; /* რუკის ზემოთ */
-            left: 1%; /* რუკასთან ახლოს */
-            transform: skewX(-10deg); /* ნაკლებად დახრილი, უფრო სუფთა */
+            bottom: 3.5%; 
+            left: 16vw; /* Map ki right side lo untundi */
             display: none; 
             z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 3px solid #f1c40f;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.6);
+            transform: skewX(-5deg);
         }
-        .speedo-content {
-            background: rgba(0, 0, 0, 0.6); /* ნახევრადგამჭვირვალე შავი */
-            padding: 10px 15px;
-            border-right: 3px solid #f1c40f; /* Honex ყვითელი ხაზი */
-            border-radius: 3px;
+        .speed-row {
             display: flex;
-            align-items: flex-end;
-            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            align-items: baseline;
+            gap: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 5px;
+            margin-bottom: 5px;
         }
         #speed-val {
-            font-size: 48px; /* დიდი ციფრები */
-            color: #f1c40f; /* Honex ყვითელი */
-            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); /* მცირე "ნათება" */
+            font-size: 45px;
+            color: #f1c40f;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.4);
             line-height: 1;
         }
         .speedo-label {
-            font-size: 14px; 
-            color: #fff; 
-            margin-left: 5px; 
-            margin-bottom: 4px;
-            font-weight: 700;
+            font-size: 14px;
+            color: #ccc;
         }
+        .speedo-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 15px;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .speedo-stats i { margin-right: 5px; }
+        .speedo-indicators {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+        }
+        .indicator { transition: color 0.3s; }
     </style>
 </head>
 <body>
@@ -117,9 +128,18 @@
     <div class="map-frame"></div>
     
     <div id="speedo-box">
-        <div class="speedo-content">
+        <div class="speed-row">
             <div id="speed-val">000</div>
             <div class="speedo-label">KM/H</div>
+        </div>
+        <div class="speedo-stats">
+            <div><i class="fas fa-gas-pump" style="color:#e67e22;"></i><span id="fuel-val">100</span>L</div>
+            <div><i class="fas fa-wrench" style="color:#95a5a6;"></i><span id="vhp-val">100</span>%</div>
+        </div>
+        <div class="speedo-indicators">
+            <i id="icon-engine" class="fas fa-car-battery indicator" style="color:#e74c3c;"></i>
+            <i id="icon-lights" class="fas fa-lightbulb indicator" style="color:#7f8c8d;"></i>
+            <i id="icon-doors" class="fas fa-lock-open indicator" style="color:#2ecc71;"></i>
         </div>
     </div>
 
@@ -127,29 +147,25 @@
         let currentMoney = 0;
 
         if (typeof cef !== 'undefined') {
-            
-            // SAMP-ის ჩატის დამალვა
             cef.emit("game:chat:setBoxVisible", false);
-
-            // GTA-ს ჰუდის კომპონენტების სათითაოდ გათიშვა
-            cef.emit("game:hud:setComponentVisible", 2, false);  // Ammo
-            cef.emit("game:hud:setComponentVisible", 3, false);  // Weapon
-            cef.emit("game:hud:setComponentVisible", 4, false);  // HP
-            cef.emit("game:hud:setComponentVisible", 18, false); // Money
+            cef.emit("game:hud:setComponentVisible", 2, false); 
+            cef.emit("game:hud:setComponentVisible", 3, false);  
+            cef.emit("game:hud:setComponentVisible", 4, false);  
+            cef.emit("game:hud:setComponentVisible", 18, false); 
             
             cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
                 updateHud(money, hp, arm, weapon, ammo, totalammo);
             });
 
-            cef.on("updateSpeedo", (speed, fuel, hp, engine) => {
-                updateSpeedo(speed, fuel, hp, engine);
+            cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => {
+                updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh);
             });
             
         } else {
             console.log("CEF is not defined. Testing mode activated.");
             setTimeout(() => updateHud(5000, 75, 50, 24, 7, 30), 500); 
-            // ტესტისთვის გამოვაჩინოთ სპიდომეტრიც
-            setTimeout(() => updateSpeedo(120, 100, 100, 1), 1000); 
+            // Browser lo test cheyadaniki dummy data
+            setTimeout(() => updateSpeedo(120, 85, 800, 1, 1, 1, 1), 1000); 
         }
 
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
@@ -158,18 +174,15 @@
 
             if (money !== currentMoney) {
                 moneyCont.classList.add('money-update');
-                
                 let start = currentMoney;
                 let end = money;
                 let duration = 500;
                 let startTime = null;
-
                 function animate(currentTime) {
                     if (!startTime) startTime = currentTime;
                     let progress = currentTime - startTime;
                     let val = Math.round(start + (end - start) * (Math.min(progress / duration, 1))); 
                     moneyElem.innerText = val.toLocaleString();
-                    
                     if (progress < duration) {
                         requestAnimationFrame(animate);
                     } else {
@@ -201,13 +214,28 @@
             }
         }
 
-        function updateSpeedo(speed, fuel, veh_hp, in_veh) {
+        // Kotha Speedo logic
+        function updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh) {
             const box = document.getElementById('speedo-box');
-            // boolean-ის ან 1-ის შემოწმება
             if(in_veh === true || in_veh === 1 || in_veh === "1") {
                 box.style.display = 'block';
-                // ვამატებთ 0-ებს წინ, მაგ: 005
                 document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0');
+                document.getElementById('fuel-val').innerText = fuel;
+
+                // Vehicle HP ni percentage lo chupinchadaniki (1000 = 100%, 250 = 0%)
+                let hpPercent = Math.max(0, Math.min(100, Math.round((veh_hp - 250) / 7.5)));
+                document.getElementById('vhp-val').innerText = hpPercent;
+
+                // Engine on (Green) / off (Red)
+                document.getElementById('icon-engine').style.color = (engine === 1) ? '#2ecc71' : '#e74c3c';
+                
+                // Lights on (Yellow) / off (Grey)
+                document.getElementById('icon-lights').style.color = (lights === 1) ? '#f1c40f' : '#7f8c8d';
+                
+                // Doors locked (Red) / unlocked (Green)
+                const doorsIcon = document.getElementById('icon-doors');
+                doorsIcon.className = (doors === 1) ? 'fas fa-lock' : 'fas fa-lock-open';
+                doorsIcon.style.color = (doors === 1) ? '#e74c3c' : '#2ecc71';
             } else {
                 box.style.display = 'none';
             }
