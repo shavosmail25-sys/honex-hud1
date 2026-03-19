@@ -39,14 +39,14 @@
 
         .bar-bg { width: 150px; height: 8px; background: rgba(255,255,255,0.1); overflow: hidden; }
         .fill { height: 100%; transition: width 0.5s ease-in-out; }
-        #hp-fill { background: linear-gradient(90deg, #d31027, #ea384d); }
-        #arm-fill { background: linear-gradient(90deg, #2b5876, #4e4376); }
+        #hp-fill { background: linear-gradient(90deg, #d31027, #ea384d); width: 100%; } /* საწყისი მნიშვნელობა */
+        #arm-fill { background: linear-gradient(90deg, #2b5876, #4e4376); width: 0%; } /* საწყისი მნიშვნელობა */
 
-        /* რუკის ჩარჩო - გასწორებული კოორდინატები */
+        /* რუკის ჩარჩო */
         .map-frame {
             position: absolute; 
-            bottom: 24px; /* აწეულია ზუსტად რუკის სიმაღლეზე */
-            left: 24px;   /* შეწეულია რუკის კიდესთან */
+            bottom: 24px; 
+            left: 24px;   
             width: 155px; 
             height: 105px;
             border: 3px solid rgba(0, 0, 0, 0.8);
@@ -89,33 +89,52 @@
     </div>
 
     <div class="map-frame"></div>
-    <div id="speedo-box"><div class="speedo-content"><div id="speed-val" style="font-size: 32px; color: #fff;">000</div></div></div>
+    
+    <div id="speedo-box">
+        <div class="speedo-content">
+            <div id="speed-val" style="font-size: 32px; color: #fff;">000</div>
+        </div>
+    </div>
 
     <script>
-        if (typeof cef !== 'undefined') {
-    // SAMP-ის ჩატის დამალვა
-    cef.emit("game:chat:setBoxVisible", false);
-
-    // GTA-ს ჰუდის კომპონენტების სათითაოდ გათიშვა
-    cef.emit("game:hud:setComponentVisible", 2, false);  // Ammo (ტყვიები)
-    cef.emit("game:hud:setComponentVisible", 3, false);  // Weapon (იარაღი)
-    cef.emit("game:hud:setComponentVisible", 4, false);  // HP (სიცოცხლე)
-    cef.emit("game:hud:setComponentVisible", 18, false); // Money (ფული)
-    
-    // თუ გინდა რუკაც (Radar) გაქრეს, გამოიყენე ეს:
-    // cef.emit("game:hud:setComponentVisible", 1, false);
-
         let currentMoney = 0;
 
+        // ვამოწმებთ, რომ cef ობიექტი ნამდვილად არსებობს
+        if (typeof cef !== 'undefined') {
+            
+            // SAMP-ის ჩატის დამალვა
+            cef.emit("game:chat:setBoxVisible", false);
+
+            // GTA-ს ჰუდის კომპონენტების სათითაოდ გათიშვა
+            cef.emit("game:hud:setComponentVisible", 2, false);  // Ammo (ტყვიები)
+            cef.emit("game:hud:setComponentVisible", 3, false);  // Weapon (იარაღი)
+            cef.emit("game:hud:setComponentVisible", 4, false);  // HP (სიცოცხლე)
+            cef.emit("game:hud:setComponentVisible", 18, false); // Money (ფული)
+            
+            // ივენთ ლისენერები, რომლებიც ელოდებიან Pawn-დან მონაცემებს
+            cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
+                updateHud(money, hp, arm, weapon, ammo, totalammo);
+            });
+
+            cef.on("updateSpeedo", (speed, fuel, hp, engine) => {
+                updateSpeedo(speed, fuel, hp, engine);
+            });
+            
+        } else {
+            console.log("CEF is not defined. Testing mode activated.");
+            // თუ ბრაუზერში ხსნი (თამაშის გარეთ) ტესტირებისთვის
+            setTimeout(() => updateHud(5000, 75, 50, 24, 7, 30), 1000); 
+        }
+
+        // მთავარი ფუნქცია, რომელიც აახლებს UI-ს
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
             const moneyElem = document.getElementById('money');
             const moneyCont = document.getElementById('money-cont');
 
-            // ფულის ანიმაცია: თუ ფული შეიცვალა
+            // ფულის ანიმაცია
             if (money !== currentMoney) {
                 moneyCont.classList.add('money-update');
                 
-                // რიცხვების "რბოლის" ეფექტი
                 let start = currentMoney;
                 let end = money;
                 let duration = 500;
@@ -124,49 +143,56 @@
                 function animate(currentTime) {
                     if (!startTime) startTime = currentTime;
                     let progress = currentTime - startTime;
-                    let val = Math.floor(start + (end - start) * (progress / duration));
+                    // ვიყენებთ Math.round-ს უფრო ზუსტი დამრგვალებისთვის
+                    let val = Math.round(start + (end - start) * (Math.min(progress / duration, 1))); 
                     moneyElem.innerText = val.toLocaleString();
+                    
                     if (progress < duration) {
                         requestAnimationFrame(animate);
                     } else {
                         moneyElem.innerText = end.toLocaleString();
-                        moneyCont.classList.remove('money-update');
+                        setTimeout(() => moneyCont.classList.remove('money-update'), 150); // ანიმაციის მოხსნა მცირე დაყოვნებით
                     }
                 }
                 requestAnimationFrame(animate);
                 currentMoney = money;
+            } else {
+                // თუ ფული არ შეცვლილა, უბრალოდ ვწერთ
+                moneyElem.innerText = money.toLocaleString();
             }
 
-            document.getElementById('hp-fill').style.width = hp + '%';
-            document.getElementById('arm-fill').style.width = arm + '%';
+            // HP და Armour ზოლების განახლება
+            document.getElementById('hp-fill').style.width = Math.max(0, Math.min(100, hp)) + '%';
+            document.getElementById('arm-fill').style.width = Math.max(0, Math.min(100, arm)) + '%';
             
+            // იარაღის აიქონის ლოგიკა
             let icon = '<i class="fas fa-hand-fist"></i>'; 
             if (weaponid >= 22 && weaponid <= 24) icon = '<i class="fas fa-gun"></i>';
-            if (weaponid >= 25 && weaponid <= 34) icon = '<i class="fas fa-person-rifle"></i>';
+            else if (weaponid >= 25 && weaponid <= 34) icon = '<i class="fas fa-person-rifle"></i>';
             document.getElementById('w-icon').innerHTML = icon;
 
-            if(weaponid == 0) {
-                document.querySelector('.ammo').style.display = "none";
+            // ტყვიების ჩვენება/დამალვა
+            const ammoDisplay = document.querySelector('.ammo');
+            if(weaponid === 0) {
+                ammoDisplay.style.display = "none";
             } else {
-                document.querySelector('.ammo').style.display = "block";
+                ammoDisplay.style.display = "block";
                 document.getElementById('ammo-val').innerText = ammo;
                 document.getElementById('ammo-total').innerText = totalammo;
             }
         }
 
+        // სპიდომეტრის განახლება
         function updateSpeedo(speed, fuel, veh_hp, in_veh) {
             const box = document.getElementById('speedo-box');
-            box.style.display = in_veh ? 'block' : 'none';
-            if(in_veh) document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0');
+            // boolean-ის შემოწმება უფრო უსაფრთხოა
+            if(in_veh === true || in_veh === 1) {
+                box.style.display = 'block';
+                document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0');
+            } else {
+                box.style.display = 'none';
+            }
         }
-
-        cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
-            updateHud(money, hp, arm, weapon, ammo, totalammo);
-        });
-
-        cef.on("updateSpeedo", (speed, fuel, hp, engine) => {
-            updateSpeedo(speed, fuel, hp, engine);
-        });
     </script>
 </body>
 </html>
