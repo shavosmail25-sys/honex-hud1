@@ -92,11 +92,18 @@
     <div id="speedo-box"><div class="speedo-content"><div id="speed-val" style="font-size: 32px; color: #fff;">000</div></div></div>
 
     <script>
-        // GTA ჰუდის კომპონენტების დამალვა
-        cef.emit("game:hud:setComponentVisible", 2, false); 
-        cef.emit("game:hud:setComponentVisible", 3, false); 
-        cef.emit("game:hud:setComponentVisible", 4, false); 
-        cef.emit("game:hud:setComponentVisible", 18, false);
+        if (typeof cef !== 'undefined') {
+    // SAMP-ის ჩატის დამალვა
+    cef.emit("game:chat:setBoxVisible", false);
+
+    // GTA-ს ჰუდის კომპონენტების სათითაოდ გათიშვა
+    cef.emit("game:hud:setComponentVisible", 2, false);  // Ammo (ტყვიები)
+    cef.emit("game:hud:setComponentVisible", 3, false);  // Weapon (იარაღი)
+    cef.emit("game:hud:setComponentVisible", 4, false);  // HP (სიცოცხლე)
+    cef.emit("game:hud:setComponentVisible", 18, false); // Money (ფული)
+    
+    // თუ გინდა რუკაც (Radar) გაქრეს, გამოიყენე ეს:
+    // cef.emit("game:hud:setComponentVisible", 1, false);
 
         let currentMoney = 0;
 
