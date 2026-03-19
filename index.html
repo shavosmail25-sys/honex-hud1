@@ -2,26 +2,48 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Oswald', sans-serif; background: transparent; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: transparent; }
         
-        /* ლოგო */
+        /* === ჩატის სტილი (სურათის მიხედვით) === */
+        #chat-container {
+            position: absolute; top: 20px; left: 20px;
+            width: 450px; height: 250px;
+            display: flex; flex-direction: column;
+            justify-content: flex-end;
+            pointer-events: none; /* რომ თამაშს ხელი არ შეუშალოს */
+        }
+
+        .chat-msg {
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
+            padding: 4px 12px;
+            margin-bottom: 3px;
+            border-left: 3px solid rgba(241, 196, 15, 0.8); /* Honex ყვითელი ხაზი */
+            color: #fff;
+            font-size: 14px;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+            max-width: fit-content;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* === HUD და ლოგო === */
         .server-name {
             position: absolute; top: 15px; right: 25px;
             font-family: 'Montserrat', sans-serif; font-size: 18px;
             background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            transform: skewX(-15deg); font-weight: 900; z-index: 100;
+            transform: skewX(-15deg); font-weight: 900;
         }
 
-        /* მთავარი ჰუდი (ფული, იარაღი) */
         #hud-container {
             position: absolute; top: 50px; right: 25px;
             display: flex; flex-direction: column; align-items: flex-end;
-            transform: skewX(-15deg); z-index: 100;
+            transform: skewX(-15deg);
         }
 
         .money-wrapper {
@@ -47,48 +69,23 @@
         .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
         .ammo { font-size: 14px; color: #f39c12; }
 
-        /* რუკის ჩარჩო (მარცხენა ქვედა კუთხე) */
-        .map-frame {
-            position: absolute; bottom: 3.5%; left: 1%;   
-            width: 14vw; height: 18vh; 
-            border: 2px solid rgba(0, 0, 0, 0.9); border-radius: 4px; 
-            z-index: 10; box-shadow: 0 0 10px rgba(0,0,0,0.6);
-        }
-
-        /* სპიდომეტრი (მარჯვენა ქვედა კუთხე) */
+        /* === სპიდომეტრი === */
         #speedo-box {
-            position: absolute; 
-            bottom: 40px; 
-            right: 40px; /* <--- აი აქ არის გასაღები, რუკას აღარ დააჯდება! */
-            display: none; 
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.7);
-            border-bottom: 3px solid #f1c40f;
-            padding: 10px 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.6);
-            transform: skewX(-5deg);
+            position: absolute; bottom: 40px; right: 40px;
+            display: none; background: rgba(0, 0, 0, 0.7);
+            border-bottom: 3px solid #f1c40f; padding: 10px 20px;
+            border-radius: 5px; transform: skewX(-5deg);
         }
-        .speed-row {
-            display: flex; align-items: baseline; gap: 5px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 5px; margin-bottom: 5px;
-        }
-        #speed-val {
-            font-size: 45px; color: #f1c40f; font-weight: bold;
-            text-shadow: 0 0 10px rgba(241, 196, 15, 0.4); line-height: 1;
-        }
+        .speed-row { display: flex; align-items: baseline; gap: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px; }
+        #speed-val { font-size: 45px; color: #f1c40f; font-weight: bold; line-height: 1; }
         .speedo-label { font-size: 14px; color: #ccc; }
-        .speedo-stats {
-            display: flex; gap: 20px; font-size: 15px;
-            color: #fff; margin-bottom: 8px;
-        }
-        .speedo-indicators {
-            display: flex; justify-content: space-between; font-size: 18px;
-        }
+        .speedo-stats { display: flex; gap: 20px; font-size: 15px; color: #fff; margin-bottom: 8px; }
+        .speedo-indicators { display: flex; justify-content: space-between; font-size: 18px; }
     </style>
 </head>
 <body>
+    <div id="chat-container"></div>
+
     <div class="server-name">HONEX ROLE PLAY</div>
 
     <div id="hud-container">
@@ -101,8 +98,6 @@
         <div class="stat-item"><div class="bar-bg"><div id="arm-fill" class="fill"></div></div></div>
     </div>
 
-    <div class="map-frame"></div>
-    
     <div id="speedo-box">
         <div class="speed-row">
             <div id="speed-val">000</div>
@@ -129,6 +124,11 @@
             cef.emit("game:hud:setComponentVisible", 4, false);  
             cef.emit("game:hud:setComponentVisible", 18, false); 
             
+            // ჩატის მოსმენა
+            cef.on("chat:addMessage", (text) => {
+                addChatMessage(text);
+            });
+
             cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
                 updateHud(money, hp, arm, weapon, ammo, totalammo);
             });
@@ -138,10 +138,23 @@
             });
         }
 
+        // ჩატის ფუნქცია
+        function addChatMessage(text) {
+            const container = document.getElementById('chat-container');
+            const msg = document.createElement('div');
+            msg.className = 'chat-msg';
+            msg.innerHTML = text; // HTML-ის გამოყენება ფერადი კოდებისთვის
+            container.appendChild(msg);
+
+            // შევინარჩუნოთ ბოლო 10 მესიჯი
+            if (container.childNodes.length > 10) {
+                container.removeChild(container.firstChild);
+            }
+        }
+
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
             const moneyElem = document.getElementById('money');
             const moneyCont = document.getElementById('money-cont');
-
             if (money !== currentMoney) {
                 moneyCont.classList.add('money-update');
                 let start = currentMoney;
@@ -158,9 +171,7 @@
                 }
                 requestAnimationFrame(animate);
                 currentMoney = money;
-            } else {
-                moneyElem.innerText = money.toLocaleString();
-            }
+            } else { moneyElem.innerText = money.toLocaleString(); }
 
             document.getElementById('hp-fill').style.width = Math.max(0, Math.min(100, hp)) + '%';
             document.getElementById('arm-fill').style.width = Math.max(0, Math.min(100, arm)) + '%';
@@ -181,19 +192,14 @@
                 box.style.display = 'block';
                 document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0');
                 document.getElementById('fuel-val').innerText = fuel;
-
                 let hpPercent = Math.max(0, Math.min(100, Math.round((veh_hp - 250) / 7.5)));
                 document.getElementById('vhp-val').innerText = hpPercent;
-
                 document.getElementById('icon-engine').style.color = (engine === 1) ? '#2ecc71' : '#e74c3c';
                 document.getElementById('icon-lights').style.color = (lights === 1) ? '#f1c40f' : '#7f8c8d';
-                
                 const doorsIcon = document.getElementById('icon-doors');
                 doorsIcon.className = (doors === 1) ? 'fas fa-lock' : 'fas fa-lock-open';
                 doorsIcon.style.color = (doors === 1) ? '#e74c3c' : '#2ecc71';
-            } else {
-                box.style.display = 'none';
-            }
+            } else { box.style.display = 'none'; }
         }
     </script>
 </body>
