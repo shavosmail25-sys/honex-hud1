@@ -8,29 +8,6 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: transparent; }
         
-        /* === ჩატის სტილი (სურათის მიხედვით) === */
-        #chat-container {
-            position: absolute; top: 20px; left: 20px;
-            width: 450px; height: 250px;
-            display: flex; flex-direction: column;
-            justify-content: flex-end;
-            pointer-events: none; /* რომ თამაშს ხელი არ შეუშალოს */
-        }
-
-        .chat-msg {
-            background: linear-gradient(90deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
-            padding: 4px 12px;
-            margin-bottom: 3px;
-            border-left: 3px solid rgba(241, 196, 15, 0.8); /* Honex ყვითელი ხაზი */
-            color: #fff;
-            font-size: 14px;
-            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s ease;
-            max-width: fit-content;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-
         /* === HUD და ლოგო === */
         .server-name {
             position: absolute; top: 15px; right: 25px;
@@ -69,6 +46,23 @@
         .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
         .ammo { font-size: 14px; color: #f39c12; }
 
+        /* === Gift HUD (საჩუქარი) === */
+        #gift-container {
+            position: absolute;
+            bottom: 23vh; 
+            left: 1%;
+            display: none; 
+            align-items: center;
+            background: rgba(20, 20, 20, 0.8);
+            border-left: 4px solid #f1c40f;
+            padding: 8px 15px;
+            transform: skewX(-15deg);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        .gift-icon { color: #f1c40f; font-size: 20px; margin-right: 10px; transform: skewX(15deg); animation: pulse 1.5s infinite; }
+        .gift-time { color: #fff; font-size: 16px; font-weight: bold; transform: skewX(15deg); text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+        @keyframes pulse { 0% { transform: skewX(15deg) scale(1); } 50% { transform: skewX(15deg) scale(1.1); } 100% { transform: skewX(15deg) scale(1); } }
+
         /* === სპიდომეტრი === */
         #speedo-box {
             position: absolute; bottom: 40px; right: 40px;
@@ -84,7 +78,10 @@
     </style>
 </head>
 <body>
-    <div id="chat-container"></div>
+    <div id="gift-container">
+        <div class="gift-icon"><i class="fas fa-gift"></i></div>
+        <div id="gift-val" class="gift-time">00:00:00</div>
+    </div>
 
     <div class="server-name">HONEX ROLE PLAY</div>
 
@@ -118,17 +115,11 @@
         let currentMoney = 0;
 
         if (typeof cef !== 'undefined') {
-            cef.emit("game:chat:setBoxVisible", false);
             cef.emit("game:hud:setComponentVisible", 2, false); 
             cef.emit("game:hud:setComponentVisible", 3, false);  
             cef.emit("game:hud:setComponentVisible", 4, false);  
             cef.emit("game:hud:setComponentVisible", 18, false); 
             
-            // ჩატის მოსმენა
-            cef.on("chat:addMessage", (text) => {
-                addChatMessage(text);
-            });
-
             cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
                 updateHud(money, hp, arm, weapon, ammo, totalammo);
             });
@@ -136,20 +127,14 @@
             cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => {
                 updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh);
             });
-        }
 
-        // ჩატის ფუნქცია
-        function addChatMessage(text) {
-            const container = document.getElementById('chat-container');
-            const msg = document.createElement('div');
-            msg.className = 'chat-msg';
-            msg.innerHTML = text; // HTML-ის გამოყენება ფერადი კოდებისთვის
-            container.appendChild(msg);
-
-            // შევინარჩუნოთ ბოლო 10 მესიჯი
-            if (container.childNodes.length > 10) {
-                container.removeChild(container.firstChild);
-            }
+            cef.on("updateGift", (timeStr, isVisible) => {
+                const giftCont = document.getElementById('gift-container');
+                if(isVisible) {
+                    giftCont.style.display = 'flex';
+                    document.getElementById('gift-val').innerText = timeStr;
+                } else { giftCont.style.display = 'none'; }
+            });
         }
 
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
