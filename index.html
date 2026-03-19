@@ -13,13 +13,13 @@
             font-family: 'Montserrat', sans-serif; font-size: 18px;
             background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            transform: skewX(-15deg); font-weight: 900;
+            transform: skewX(-15deg); font-weight: 900; z-index: 100;
         }
 
         #hud-container {
             position: absolute; top: 50px; right: 25px;
             display: flex; flex-direction: column; align-items: flex-end;
-            transform: skewX(-15deg);
+            transform: skewX(-15deg); z-index: 100;
         }
 
         .money-wrapper {
@@ -29,7 +29,6 @@
             transition: transform 0.2s ease, color 0.2s ease;
         }
         
-        /* ანიმაციის კლასი ფულის მატებისას */
         .money-update { transform: scale(1.1); color: #27ae60; }
 
         .stat-item {
@@ -38,23 +37,25 @@
         }
 
         .bar-bg { width: 150px; height: 8px; background: rgba(255,255,255,0.1); overflow: hidden; }
-        .fill { height: 100%; transition: width 0.5s ease-in-out; }
-        #hp-fill { background: linear-gradient(90deg, #d31027, #ea384d); width: 100%; } /* საწყისი მნიშვნელობა */
-        #arm-fill { background: linear-gradient(90deg, #2b5876, #4e4376); width: 0%; } /* საწყისი მნიშვნელობა */
+        .fill { height: 100%; transition: width 0.3s ease-in-out; }
+        #hp-fill { background: linear-gradient(90deg, #d31027, #ea384d); width: 100%; } 
+        #arm-fill { background: linear-gradient(90deg, #2b5876, #4e4376); width: 0%; } 
 
-        /* რუკის ჩარჩო */
+        /* ============================ */
+        /* == რუკის ჩარჩო (გასწორებული) == */
+        /* ============================ */
         .map-frame {
             position: absolute; 
-            bottom: 24px; 
-            left: 24px;   
-            width: 155px; 
-            height: 105px;
-            border: 3px solid rgba(0, 0, 0, 0.8);
-            border-radius: 2px;
+            bottom: 3.5%; /* პოზიცია ქვემოდან */
+            left: 1%;   /* პოზიცია მარცხნიდან */   
+            width: 14vw;  /* სიგანე ეკრანის პროპორციულად */
+            height: 18vh; /* სიმაღლე ეკრანის პროპორციულად */
+            border: 2px solid rgba(0, 0, 0, 0.9); /* ჩარჩო */
+            border-radius: 4px; /* მცირედი დამრგვალება */
             background: transparent;
             z-index: 10;
             pointer-events: none;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 10px rgba(0,0,0,0.6);
         }
 
         .weapon-box {
@@ -65,13 +66,38 @@
         .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
         .ammo { font-size: 14px; color: #f39c12; }
 
+        /* ============================== */
+        /* == სპიდომეტრი (ახალი დიზაინი) == */
+        /* ============================== */
         #speedo-box {
-            position: absolute; bottom: 20px; right: 25px;
-            transform: skewX(-15deg); display: none;
+            position: absolute; 
+            bottom: 30px; /* რუკის ზემოთ */
+            left: 1%; /* რუკასთან ახლოს */
+            transform: skewX(-10deg); /* ნაკლებად დახრილი, უფრო სუფთა */
+            display: none; 
+            z-index: 100;
         }
         .speedo-content {
-            background: rgba(0,0,0,0.6); padding: 10px;
-            border-right: 4px solid #f1c40f;
+            background: rgba(0, 0, 0, 0.6); /* ნახევრადგამჭვირვალე შავი */
+            padding: 10px 15px;
+            border-right: 3px solid #f1c40f; /* Honex ყვითელი ხაზი */
+            border-radius: 3px;
+            display: flex;
+            align-items: flex-end;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+        }
+        #speed-val {
+            font-size: 48px; /* დიდი ციფრები */
+            color: #f1c40f; /* Honex ყვითელი */
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); /* მცირე "ნათება" */
+            line-height: 1;
+        }
+        .speedo-label {
+            font-size: 14px; 
+            color: #fff; 
+            margin-left: 5px; 
+            margin-bottom: 4px;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -92,26 +118,25 @@
     
     <div id="speedo-box">
         <div class="speedo-content">
-            <div id="speed-val" style="font-size: 32px; color: #fff;">000</div>
+            <div id="speed-val">000</div>
+            <div class="speedo-label">KM/H</div>
         </div>
     </div>
 
     <script>
         let currentMoney = 0;
 
-        // ვამოწმებთ, რომ cef ობიექტი ნამდვილად არსებობს
         if (typeof cef !== 'undefined') {
             
             // SAMP-ის ჩატის დამალვა
             cef.emit("game:chat:setBoxVisible", false);
 
             // GTA-ს ჰუდის კომპონენტების სათითაოდ გათიშვა
-            cef.emit("game:hud:setComponentVisible", 2, false);  // Ammo (ტყვიები)
-            cef.emit("game:hud:setComponentVisible", 3, false);  // Weapon (იარაღი)
-            cef.emit("game:hud:setComponentVisible", 4, false);  // HP (სიცოცხლე)
-            cef.emit("game:hud:setComponentVisible", 18, false); // Money (ფული)
+            cef.emit("game:hud:setComponentVisible", 2, false);  // Ammo
+            cef.emit("game:hud:setComponentVisible", 3, false);  // Weapon
+            cef.emit("game:hud:setComponentVisible", 4, false);  // HP
+            cef.emit("game:hud:setComponentVisible", 18, false); // Money
             
-            // ივენთ ლისენერები, რომლებიც ელოდებიან Pawn-დან მონაცემებს
             cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
                 updateHud(money, hp, arm, weapon, ammo, totalammo);
             });
@@ -122,16 +147,15 @@
             
         } else {
             console.log("CEF is not defined. Testing mode activated.");
-            // თუ ბრაუზერში ხსნი (თამაშის გარეთ) ტესტირებისთვის
-            setTimeout(() => updateHud(5000, 75, 50, 24, 7, 30), 1000); 
+            setTimeout(() => updateHud(5000, 75, 50, 24, 7, 30), 500); 
+            // ტესტისთვის გამოვაჩინოთ სპიდომეტრიც
+            setTimeout(() => updateSpeedo(120, 100, 100, 1), 1000); 
         }
 
-        // მთავარი ფუნქცია, რომელიც აახლებს UI-ს
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
             const moneyElem = document.getElementById('money');
             const moneyCont = document.getElementById('money-cont');
 
-            // ფულის ანიმაცია
             if (money !== currentMoney) {
                 moneyCont.classList.add('money-update');
                 
@@ -143,7 +167,6 @@
                 function animate(currentTime) {
                     if (!startTime) startTime = currentTime;
                     let progress = currentTime - startTime;
-                    // ვიყენებთ Math.round-ს უფრო ზუსტი დამრგვალებისთვის
                     let val = Math.round(start + (end - start) * (Math.min(progress / duration, 1))); 
                     moneyElem.innerText = val.toLocaleString();
                     
@@ -151,27 +174,23 @@
                         requestAnimationFrame(animate);
                     } else {
                         moneyElem.innerText = end.toLocaleString();
-                        setTimeout(() => moneyCont.classList.remove('money-update'), 150); // ანიმაციის მოხსნა მცირე დაყოვნებით
+                        setTimeout(() => moneyCont.classList.remove('money-update'), 150); 
                     }
                 }
                 requestAnimationFrame(animate);
                 currentMoney = money;
             } else {
-                // თუ ფული არ შეცვლილა, უბრალოდ ვწერთ
                 moneyElem.innerText = money.toLocaleString();
             }
 
-            // HP და Armour ზოლების განახლება
             document.getElementById('hp-fill').style.width = Math.max(0, Math.min(100, hp)) + '%';
             document.getElementById('arm-fill').style.width = Math.max(0, Math.min(100, arm)) + '%';
             
-            // იარაღის აიქონის ლოგიკა
             let icon = '<i class="fas fa-hand-fist"></i>'; 
             if (weaponid >= 22 && weaponid <= 24) icon = '<i class="fas fa-gun"></i>';
             else if (weaponid >= 25 && weaponid <= 34) icon = '<i class="fas fa-person-rifle"></i>';
             document.getElementById('w-icon').innerHTML = icon;
 
-            // ტყვიების ჩვენება/დამალვა
             const ammoDisplay = document.querySelector('.ammo');
             if(weaponid === 0) {
                 ammoDisplay.style.display = "none";
@@ -182,12 +201,12 @@
             }
         }
 
-        // სპიდომეტრის განახლება
         function updateSpeedo(speed, fuel, veh_hp, in_veh) {
             const box = document.getElementById('speedo-box');
-            // boolean-ის შემოწმება უფრო უსაფრთხოა
-            if(in_veh === true || in_veh === 1) {
+            // boolean-ის ან 1-ის შემოწმება
+            if(in_veh === true || in_veh === 1 || in_veh === "1") {
                 box.style.display = 'block';
+                // ვამატებთ 0-ებს წინ, მაგ: 005
                 document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0');
             } else {
                 box.style.display = 'none';
