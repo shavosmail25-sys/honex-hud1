@@ -8,16 +8,31 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: transparent; }
         
-        /* === HUD და ლოგო === */
+        /* === სერვერის ინფო პანელი (მარცხნივ) === */
+        .server-info-bar {
+            position: absolute; top: 15px; left: 25px;
+            display: flex; gap: 10px; transform: skewX(-15deg); z-index: 100;
+        }
+
+        .info-block {
+            background: rgba(0, 0, 0, 0.6); border-bottom: 2px solid #f1c40f;
+            padding: 4px 12px; color: #fff; font-family: 'Oswald', sans-serif;
+            font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;
+        }
+
+        .info-block i { color: #f1c40f; transform: skewX(15deg); }
+        .info-text { transform: skewX(15deg); letter-spacing: 0.5px; }
+
+        /* === ლოგო (მარჯვნივ) === */
         .server-name {
             position: absolute; top: 15px; right: 25px;
             font-family: 'Montserrat', sans-serif; font-size: 18px;
             background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            transform: skewX(-15deg); font-weight: 900;
-            z-index: 100;
+            transform: skewX(-15deg); font-weight: 900; z-index: 100;
         }
 
+        /* === HUD კონტეინერი === */
         #hud-container {
             position: absolute; top: 50px; right: 25px;
             display: flex; flex-direction: column; align-items: flex-end;
@@ -41,52 +56,10 @@
 
         .weapon-box {
             background: rgba(0, 0, 0, 0.6); padding: 5px 12px;
-            border-left: 3px solid #f39c12; margin-bottom: 8px;
-            display: flex; align-items: center;
+            border-left: 3px solid #f39c12; margin-bottom: 8px; display: flex; align-items: center;
         }
         .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
         .ammo { font-size: 14px; color: #f39c12; }
-
-        /* === მოდერნიზებული Gift HUD (საჩუქარი) - ახალი პოზიცია ლოგოს მარცხნივ === */
-        #gift-container {
-            position: absolute;
-            top: 15px; /* Aligned vertically with logo */
-            right: 230px; /* Estimated width of logo (25px offset + ~180px text + 25px gap) */
-            display: none; /* Controlled by JS/CEF */
-            align-items: center;
-            background: rgba(0, 0, 0, 0.7); /* Mat m dark background */
-            border: 1px solid rgba(241, 196, 15, 0.4); /* Subtle yellow border */
-            padding: 4px 15px;
-            border-radius: 4px;
-            transform: skewX(-15deg); /* Slant matching logo */
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-            z-index: 101; /* Ensure above standard HUD if needed */
-        }
-
-        .gift-icon {
-            color: #f1c40f; /* Yellow matching logo accent */
-            font-size: 16px;
-            margin-right: 10px;
-            transform: skewX(15deg); /* Un-slant the icon itself so it looks normal */
-            filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5)); /* Slight glow */
-        }
-
-        .gift-time {
-            color: #fff;
-            font-family: 'Oswald', sans-serif;
-            font-size: 17px;
-            font-weight: 700;
-            transform: skewX(15deg); /* Un-slant the text */
-            letter-spacing: 1px;
-        }
-
-        @keyframes pulse {
-            0% { filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5)); }
-            50% { filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.8)); }
-            100% { filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5)); }
-        }
-        /* Apllying pulse only to the modern icon glow */
-        #gift-container .gift-icon { animation: pulse 1.5s infinite; }
 
         /* === სპიდომეტრი === */
         #speedo-box {
@@ -103,9 +76,10 @@
     </style>
 </head>
 <body>
-    <div id="gift-container">
-        <div class="gift-icon"><i class="fas fa-gift"></i></div>
-        <div id="gift-val" class="gift-time">00:00:00</div>
+    <div class="server-info-bar">
+        <div class="info-block"><i class="fas fa-users"></i><div class="info-text"><span id="online-val">0</span></div></div>
+        <div class="info-block"><i class="fas fa-clock"></i><div class="info-text"><span id="time-val">00:00</span></div></div>
+        <div class="info-block"><i class="fas fa-calendar-alt"></i><div class="info-text"><span id="date-val">19.03.2026</span></div></div>
     </div>
 
     <div class="server-name">HONEX ROLE PLAY</div>
@@ -121,10 +95,7 @@
     </div>
 
     <div id="speedo-box">
-        <div class="speed-row">
-            <div id="speed-val">000</div>
-            <div class="speedo-label">KM/H</div>
-        </div>
+        <div class="speed-row"><div id="speed-val">000</div><div class="speedo-label">KM/H</div></div>
         <div class="speedo-stats">
             <div><i class="fas fa-gas-pump" style="color:#e67e22;"></i><span id="fuel-val">100</span>L</div>
             <div><i class="fas fa-wrench" style="color:#95a5a6;"></i><span id="vhp-val">100</span>%</div>
@@ -145,22 +116,23 @@
             cef.emit("game:hud:setComponentVisible", 4, false);  
             cef.emit("game:hud:setComponentVisible", 18, false); 
             
-            cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => {
-                updateHud(money, hp, arm, weapon, ammo, totalammo);
+            cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => { updateHud(money, hp, arm, weapon, ammo, totalammo); });
+            cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => { updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh); });
+            
+            // სერვერის ინფორმაციის მიღება
+            cef.on("updateServerInfo", (online, time, date) => {
+                document.getElementById('online-val').innerText = online;
+                document.getElementById('time-val').innerText = time;
+                document.getElementById('date-val').innerText = date;
             });
-
-            cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => {
-                updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh);
-            });
-
-            // Gift ივენთი (მუშაობს დინამიკურად, თუ სერვერი ყოველ წამს აგზავნის ახალ დროს)
-            cef.on("updateGift", (timeStr, isVisible) => {
-                const giftCont = document.getElementById('gift-container');
-                if(isVisible) {
-                    giftCont.style.display = 'flex';
-                    document.getElementById('gift-val').innerText = timeStr; // აჩვენებს სერვერიდან მოსულ "00:00:15" ფორმატს
-                } else { giftCont.style.display = 'none'; }
-            });
+        } else {
+            // === ბრაუზერის ტესტ რეჟიმი ===
+            setTimeout(() => {
+                document.getElementById('online-val').innerText = "154";
+                document.getElementById('time-val').innerText = "18:45";
+                document.getElementById('date-val').innerText = "19.03.2026";
+                updateHud(101001510, 85, 40, 24, 7, 30);
+            }, 500);
         }
 
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
@@ -183,15 +155,12 @@
                 requestAnimationFrame(animate);
                 currentMoney = money;
             } else { moneyElem.innerText = money.toLocaleString(); }
-
             document.getElementById('hp-fill').style.width = Math.max(0, Math.min(100, hp)) + '%';
             document.getElementById('arm-fill').style.width = Math.max(0, Math.min(100, arm)) + '%';
-            
             let icon = '<i class="fas fa-hand-fist"></i>'; 
             if (weaponid >= 22 && weaponid <= 24) icon = '<i class="fas fa-gun"></i>';
             else if (weaponid >= 25 && weaponid <= 34) icon = '<i class="fas fa-person-rifle"></i>';
             document.getElementById('w-icon').innerHTML = icon;
-
             const ammoDisplay = document.querySelector('.ammo');
             if(weaponid === 0) { ammoDisplay.style.display = "none"; } 
             else { ammoDisplay.style.display = "block"; document.getElementById('ammo-val').innerText = ammo; document.getElementById('ammo-total').innerText = totalammo; }
