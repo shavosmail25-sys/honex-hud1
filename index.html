@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: transparent; }
         
-        /* === HUD და ლოგო (თავიდან დამალულია) === */
         .server-name { position: absolute; top: 15px; right: 25px; font-family: 'Montserrat', sans-serif; font-size: 18px; background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transform: skewX(-15deg); font-weight: 900; z-index: 100; display: none; }
         #hud-container { position: absolute; top: 50px; right: 25px; display: none; flex-direction: column; align-items: flex-end; transform: skewX(-15deg); }
         .money-wrapper { font-size: 32px; color: #2ecc71; text-shadow: 2px 2px 0px rgba(0,0,0,0.9); margin-bottom: 5px; transition: transform 0.2s ease, color 0.2s ease; }
@@ -22,7 +21,6 @@
         .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
         .ammo { font-size: 14px; color: #f39c12; }
 
-        /* === Gift და Speedo === */
         #gift-container { position: absolute; top: 15px; right: 230px; display: none; align-items: center; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(241, 196, 15, 0.4); padding: 4px 15px; border-radius: 4px; transform: skewX(-15deg); box-shadow: 0 0 20px rgba(0, 0, 0, 0.6); z-index: 101; }
         .gift-icon { color: #f1c40f; font-size: 16px; margin-right: 10px; transform: skewX(15deg); filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5)); }
         .gift-time { color: #fff; font-family: 'Oswald', sans-serif; font-size: 17px; font-weight: 700; transform: skewX(15deg); letter-spacing: 1px; }
@@ -34,21 +32,8 @@
         .speedo-stats { display: flex; gap: 20px; font-size: 15px; color: #fff; margin-bottom: 8px; }
         .speedo-indicators { display: flex; justify-content: space-between; font-size: 18px; }
 
-        /* === ფანჯრები === */
-        /* რეგისტრაცია თავიდანვე ჩანს (display: block) */
-        #register-box { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); 
-            background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); 
-            display: block; z-index: 9999; 
-            width: 400px; padding: 40px; border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; 
-        }
-        
-        #skin-box { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); 
-            background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); 
-            display: none; z-index: 9999; 
-            width: 380px; padding: 25px; border-left: 3px solid #f1c40f; 
-        }
+        #register-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); display: none; z-index: 9999; width: 400px; padding: 40px; border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; }
+        #skin-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); display: none; z-index: 9999; width: 380px; padding: 25px; border-left: 3px solid #f1c40f; }
         
         .content { transform: skewX(5deg); }
         .logo-reg { text-align: center; margin-bottom: 30px; }
@@ -132,12 +117,7 @@
             
             cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => { updateHud(money, hp, arm, weapon, ammo, totalammo); });
             cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => { updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh); });
-            cef.on("updateGift", (timeStr, isVisible) => { 
-                const giftCont = document.getElementById('gift-container'); 
-                if(isVisible) { giftCont.style.display = 'flex'; document.getElementById('gift-val').innerText = timeStr; } 
-                else { giftCont.style.display = 'none'; } 
-            });
-
+            
             cef.on("showRegisterWindow", () => {
                 document.getElementById('register-box').style.display = 'block';
             });
@@ -160,7 +140,9 @@
                 });
             });
 
-            cef.on("hideSkinSelector", () => {
+            // მთავარი მაშველი ფუნქცია! სერვერიდან რომ ვეტყვით, ეგრევე გაანათებს HUD-ს
+            cef.on("showHud", () => {
+                document.getElementById('register-box').style.display = 'none';
                 document.getElementById('skin-box').style.display = 'none';
                 document.getElementById('hud-container').style.display = 'flex';
                 document.getElementById('logo-main').style.display = 'block';
