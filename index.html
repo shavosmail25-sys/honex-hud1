@@ -2,120 +2,205 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <title>Honex RolePlay HUD</title>
+    <title>HONEX ROLEPLAY</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* მთავარი კონტეინერი და გამჭვირვალობა */
         html, body {
-            margin: 0; padding: 0; background: transparent !important; overflow: hidden;
-            width: 100vw; height: 100vh; font-family: 'Rajdhani', sans-serif; color: white;
+            margin: 0;
+            padding: 0;
+            background: transparent !important;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Rajdhani', sans-serif;
+            color: white;
         }
 
         :root {
-            --main-gold: #ffcc00; --dark-gold: #b38f00; --glow-gold: rgba(255, 204, 0, 0.7);
-            --glass-bg: rgba(15, 15, 18, 0.85); --glass-border: rgba(255, 204, 0, 0.3);
-            --hp-color: #ff4d4d; --armor-color: #e6e6e6;
+            --main-gold: #ffcc00;
+            --dark-gold: #b38f00;
+            --glow-gold: rgba(255, 204, 0, 0.6);
+            --glass-bg: rgba(15, 15, 18, 0.85);
+            --glass-border: rgba(255, 204, 0, 0.3);
+            --hp-color: #ff4d4d;
+            --armor-color: #e6e6e6;
         }
 
-        .glass-panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 5px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5); }
-        
-        /* HUD */
-        .hud-wrapper { position: absolute; top: 15px; right: 15px; width: 235px; display: flex; flex-direction: column; gap: 7px; }
+        /* საერთო პანელის სტილი */
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
 
-        /* HEADER */
-        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
-        .server-name { font-family: 'Orbitron', sans-serif; font-size: 17px; font-weight: 900; color: var(--main-gold); text-shadow: 0 0 10px var(--glow-gold); font-style: italic; letter-spacing: 0.5px; text-transform: uppercase; }
-        .stats-group { display: flex; gap: 4px; }
-        .stat-box { padding: 3px 6px; font-size: 11px; font-weight: bold; background: rgba(0, 0, 0, 0.5); border-radius: 4px; border: 1px solid var(--glass-border); }
+        /* --- HUD კონტეინერი --- */
+        .hud-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 270px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-        /* STATUS CARD */
-        .status-card { padding: 8px; display: flex; gap: 8px; align-items: center; }
-        .weapon-box { width: 48px; height: 48px; background: rgba(0,0,0,0.6); border: 1px solid var(--dark-gold); border-radius: 4px; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 12px rgba(255, 204, 0, 0.15); }
-        .bars-container { flex-grow: 1; display: flex; flex-direction: column; gap: 5px; }
-        .bar-row { display: flex; align-items: center; gap: 6px; }
-        .bar-icon { color: var(--main-gold); font-size: 11px; width: 13px; text-align: center; }
-        .bar-wrapper { position: relative; height: 13px; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; flex-grow: 1; }
-        .bar-fill { height: 100%; transition: width 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        /* ლოგო და სერვერის ინფო */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 5px;
+        }
+
+        .logo-forge {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--main-gold);
+            text-shadow: 0 0 10px var(--glow-gold);
+            font-style: italic;
+        }
+
+        .stat-box {
+            padding: 4px 10px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* იარაღი და ბარები */
+        .status-card {
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .weapon-box {
+            width: 55px;
+            height: 55px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--dark-gold);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.15);
+        }
+
+        .bar-wrapper {
+            position: relative;
+            height: 16px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
         .hp-fill { background: linear-gradient(90deg, #991b1b, #f87171); }
         .armor-fill { background: linear-gradient(90deg, #374151, #d1d5db); }
-        .bar-text { position: absolute; width: 100%; text-align: center; top: 0px; font-size: 8.5px; font-weight: 900; font-family: 'Orbitron', sans-serif; text-shadow: 1px 1px 2px black; line-height: 13px; }
 
-        /* ROLE */
-        .role-badge { background: linear-gradient(135deg, rgba(255, 204, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%); border-right: 3px solid var(--main-gold); padding: 6px 10px; text-align: right; border-radius: 3px; box-shadow: -3px 0 10px rgba(0,0,0,0.3); }
-        .role-name { font-size: 15px; font-weight: 800; color: var(--main-gold); text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 0 6px var(--glow-gold); margin: 0; }
-        .role-rank { font-size: 10.5px; color: #ffffff; opacity: 0.8; font-weight: 500; margin: 0; font-style: italic; }
+        .bar-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 1px;
+            font-size: 10px;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 1px 1px 2px black;
+        }
 
-        /* MONEY */
-        .money-group { display: flex; flex-direction: column; gap: 5px; }
-        .money-box { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-left: 3px solid var(--main-gold); }
-        .money-box i { color: var(--main-gold); margin-right: 8px; font-size: 13px; }
-        .amount { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 700; }
+        /* --- გაუმჯობესებული პროფესიის სექცია --- */
+        .role-badge {
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+            border-right: 4px solid var(--main-gold);
+            padding: 8px 12px;
+            text-align: right;
+            border-radius: 4px;
+            margin: 5px 0;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .role-name { 
+            font-size: 18px; 
+            font-weight: 800; 
+            color: var(--main-gold); 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px var(--glow-gold);
+            margin: 0;
+        }
+
+        .role-rank {
+            font-size: 12px;
+            color: #ffffff;
+            opacity: 0.8;
+            font-weight: 500;
+            margin: 0;
+            font-style: italic;
+        }
+
+        /* ფული */
+        .money-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-left: 4px solid var(--main-gold);
+        }
+
+        .amount {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
         .cash-amount { color: #4ade80; }
         .bank-amount { color: #60a5fa; }
 
-        /* GIFT BOX */
-        .gift-box {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 12px; margin-top: 1px;
-            background: linear-gradient(90deg, rgba(231, 76, 60, 0.15), rgba(15, 15, 18, 0.85));
-            border-left: 3px solid #e74c3c;
-            border-radius: 3px; border: 1px solid rgba(231, 76, 60, 0.2);
-            box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+        /* --- სპიდომეტრი --- */
+        #speedometer {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border-left: 4px solid var(--main-gold);
+            padding: 15px 25px;
+            transform: skewX(-15deg);
+            display: none;
         }
-        .gift-label { font-size: 12px; font-weight: 800; color: var(--main-gold); text-shadow: 0 0 4px rgba(255, 204, 0, 0.5); }
-        .gift-icon { color: #e74c3c; margin-right: 6px; animation: pulseGift 1.5s infinite; }
-        .gift-time { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #fff; text-shadow: 0 0 6px #e74c3c; }
 
-        /* SPEEDOMETER */
-        #speedometer { position: absolute; bottom: 25px; right: 25px; background: rgba(0, 0, 0, 0.7); border-left: 3px solid var(--main-gold); padding: 12px 20px; transform: skewX(-15deg); display: none; flex-direction: column; gap: 7px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; }
-        .speedo-content { transform: skewX(15deg); display: flex; flex-direction: column; gap: 6px; }
-        .speed-section { display: flex; align-items: baseline; gap: 4px; }
-        .speed-val { font-size: 42px; font-weight: 900; color: var(--main-gold); text-shadow: 2px 2px 0px black; line-height: 1; }
-        .speed-unit { font-size: 13px; font-weight: 800; color: #bdc3c7; }
-        .info-section { display: flex; gap: 12px; font-size: 14px; font-weight: 800; }
-        .info-item { display: flex; align-items: center; gap: 4px; }
-        .info-item i { color: var(--main-gold); font-size: 12px; }
-        .indicators { display: flex; gap: 12px; font-size: 15px; margin-top: 3px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 8px; }
-        .indicator { transition: color 0.3s; color: #7f8c8d; }
-        .indicator.on { color: #2ecc71; text-shadow: 0 0 8px #2ecc71; }
-        .indicator.warning { color: #e74c3c; text-shadow: 0 0 8px #e74c3c; }
-
-        /* --- NOTIFICATION SYSTEM (ახალი) --- */
-        .notify-item {
-            display: flex; align-items: center; gap: 12px;
-            background: rgba(15, 15, 18, 0.95); border-radius: 6px;
-            padding: 12px 20px; min-width: 250px; max-width: 450px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
-            font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700;
+        .speed-val {
+            font-size: 52px;
+            font-weight: 900;
+            color: var(--main-gold);
+            text-shadow: 3px 3px 0px black;
         }
-        
-        .notify-success { border-bottom: 3px solid #2ecc71; }
-        .notify-success .notify-icon { color: #2ecc71; text-shadow: 0 0 8px #2ecc71; }
-        
-        .notify-error { border-bottom: 3px solid #e74c3c; }
-        .notify-error .notify-icon { color: #e74c3c; text-shadow: 0 0 8px #e74c3c; }
-        
-        .notify-info { border-bottom: 3px solid #3498db; }
-        .notify-info .notify-icon { color: #3498db; text-shadow: 0 0 8px #3498db; }
-        
-        .notify-warning { border-bottom: 3px solid var(--main-gold); }
-        .notify-warning .notify-icon { color: var(--main-gold); text-shadow: 0 0 8px var(--glow-gold); }
 
-        .notify-icon { font-size: 22px; }
-        .notify-text { color: #fff; line-height: 1.3; }
+        /* --- ანიმაციები --- */
+        @keyframes flashRed {
+            0% { transform: scale(1); color: inherit; }
+            50% { transform: scale(1.15); color: #ff4d4d; }
+            100% { transform: scale(1); color: inherit; }
+        }
+        @keyframes flashGreen {
+            0% { transform: scale(1); color: inherit; }
+            50% { transform: scale(1.15); color: #2ecc71; }
+            100% { transform: scale(1); color: inherit; }
+        }
 
-        @keyframes slideDown { 0% { opacity: 0; transform: translateY(-20px); } 100% { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.9); } }
-        
-        .anim-slide-in { animation: slideDown 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; }
-        .anim-fade-out { animation: fadeOut 0.3s ease-in forwards; }
-
-        /* სხვა ანიმაციები */
-        @keyframes pulseGift { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
-        @keyframes flashRed { 0% { transform: scale(1); } 50% { transform: scale(1.08); color: #ff4d4d; } 100% { transform: scale(1); } }
-        @keyframes flashGreen { 0% { transform: scale(1); } 50% { transform: scale(1.08); color: #2ecc71; } 100% { transform: scale(1); } }
         .anim-red { animation: flashRed 0.4s ease-in-out; }
         .anim-green { animation: flashGreen 0.4s ease-in-out; }
 
@@ -123,30 +208,47 @@
 </head>
 <body>
 
-    <div id="notify-container" style="position: fixed; top: 80px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 9999; align-items: center;"></div>
+    <div id="login-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; font-family: 'Rajdhani', sans-serif;">
+        <div class="glass-panel" style="width: 320px; padding: 30px; display: flex; flex-direction: column; gap: 20px; text-align: center; border-top: 4px solid var(--main-gold);">
+            <div>
+                <div style="font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; color: var(--main-gold); text-shadow: 0 0 15px var(--glow-gold); font-style: italic;">HONEX RP</div>
+                <div style="font-size: 14px; color: #bdc3c7; font-weight: 600; margin-top: 5px;">მოგესალმებით სერვერზე!</div>
+            </div>
+            
+            <div style="font-size: 22px; font-weight: 800; color: white; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 4px;" id="login-username">Player_Name</div>
+            
+            <div style="text-align: left;">
+                <label style="font-size: 13px; color: var(--main-gold); font-weight: 700;"><i class="fas fa-lock"></i> შეიყვანეთ პაროლი</label>
+                <input type="password" id="login-password" placeholder="••••••••" style="width: 100%; box-sizing: border-box; padding: 12px; margin-top: 5px; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; border-radius: 4px; outline: none; font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: bold; text-align: center;">
+            </div>
+            
+            <div style="font-size: 13px; color: #e74c3c; font-weight: 700;" id="login-attempts">დარჩენილია 4 ცდა</div>
+            
+            <button onclick="submitLogin()" style="background: linear-gradient(90deg, #b38f00, #ffcc00); border: none; padding: 12px; color: black; font-weight: 900; font-family: 'Rajdhani', sans-serif; font-size: 18px; border-radius: 4px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);">ავტორიზაცია <i class="fas fa-sign-in-alt"></i></button>
+        </div>
+    </div>
 
     <div class="hud-wrapper">
         <div class="header-top">
-            <div class="server-name">HONEX RP</div>
+            <div class="logo-forge">HONEX ROLEPLAY</div>
             <div class="stats-group">
-                <div class="stat-box"><i class="fas fa-users"></i> <span id="hud-online">0</span></div>
-                <div class="stat-box">ID: <span id="hud-myid">0</span></div>
+                <div class="stat-box glass-panel">👥 <span id="hud-online">0</span></div>
+                <div class="stat-box glass-panel">🆔 <span id="hud-myid">0</span></div>
             </div>
         </div>
 
         <div class="status-card glass-panel">
             <div class="weapon-box">
-                <i id="hud-fist" class="fas fa-hand-rock" style="font-size: 24px; color: var(--main-gold);"></i>
-                <img id="hud-weapon" src="" style="width:85%; display:none;" alt="">
+                <img id="hud-weapon" src="weapons/0.png" style="width:80%;" alt="">
             </div> 
             <div class="bars-container">
-                <div class="bar-row">
-                    <i class="fas fa-heart bar-icon"></i>
-                    <div class="bar-wrapper"><div class="bar-fill hp-fill" id="hud-hp-fill"></div><span class="bar-text" id="hud-hp-text">100 HP</span></div>
+                <div class="bar-wrapper">
+                    <div class="bar-fill hp-fill" id="hud-hp-fill"></div>
+                    <span class="bar-text" id="hud-hp-text">100 HP</span>
                 </div>
-                <div class="bar-row">
-                    <i class="fas fa-shield-alt bar-icon"></i>
-                    <div class="bar-wrapper"><div class="bar-fill armor-fill" id="hud-armor-fill"></div><span class="bar-text" id="hud-armor-text">0 AP</span></div>
+                <div class="bar-wrapper">
+                    <div class="bar-fill armor-fill" id="hud-armor-fill"></div>
+                    <span class="bar-text" id="hud-armor-text">0 AP</span>
                 </div>
             </div>
         </div>
@@ -157,49 +259,78 @@
         </div>
 
         <div class="money-group">
-            <div class="money-box glass-panel"><span><i class="fas fa-university"></i> BANK</span><span class="amount bank-amount" id="hud-bank">$ 0</span></div>
-            <div class="money-box glass-panel"><span><i class="fas fa-wallet"></i> CASH</span><span class="amount cash-amount" id="hud-cash">$ 0</span></div>
-        </div>
-
-        <div class="gift-box">
-            <span class="gift-label"><i class="fas fa-gift gift-icon"></i> BONUS</span>
-            <span class="gift-time" id="hud-gift-time">0H 00M</span>
+            <div class="money-box glass-panel">
+                <span>💳 BANK</span>
+                <span class="amount bank-amount" id="hud-bank">$ 0</span>
+            </div>
+            <div class="money-box glass-panel">
+                <span>💵 CASH</span>
+                <span class="amount cash-amount" id="hud-cash">$ 0</span>
+            </div>
         </div>
     </div>
 
     <div id="speedometer">
-        <div class="speedo-content">
-            <div class="speed-section">
-                <span id="speed" class="speed-val">000</span>
-                <span class="speed-unit">KM/H</span>
-            </div>
-            <div class="info-section">
-                <div class="info-item"><i class="fas fa-gas-pump"></i> <span id="fuel">100</span>L</div>
-                <div class="info-item"><i class="fas fa-wrench"></i> <span id="veh-hp">1000</span></div>
-            </div>
-            <div class="indicators">
-                <i id="ind-engine" class="fas fa-cogs indicator"></i>
-                <i id="ind-lights" class="fas fa-lightbulb indicator"></i>
-                <i id="ind-doors" class="fas fa-lock-open indicator warning"></i>
+        <div style="transform: skewX(15deg); text-align:right;">
+            <div id="speed" class="speed-val">000</div>
+            <div style="font-size:14px; letter-spacing:2px; font-weight:900;">KM/H</div>
+            <div style="margin-top:10px; font-weight:800; color:#f1c40f;">
+                <i class="fas fa-gas-pump"></i> <span id="fuel">100</span>L
             </div>
         </div>
     </div>
 
     <script>
-        let lastHp = 100, lastCash = 0, lastBank = 0;
+        let lastHp = 100, lastArmor = 0, lastCash = 0, lastBank = 0;
 
         function playAnim(id, cls) {
             const el = document.getElementById(id);
-            if(!el) return;
+            if (!el) return;
             el.classList.remove('anim-red', 'anim-green');
             void el.offsetWidth;
             el.classList.add(cls);
         }
 
+        // პაროლის გაგზავნის ფუნქცია
+        function submitLogin() {
+            const pass = document.getElementById("login-password").value;
+            if(pass.length < 1) return; // თუ ცარიელია, არაფერს ვშვრებით
+
+            if (typeof cef !== 'undefined') {
+                cef.emit("server:verifyLogin", pass);
+            }
+        }
+
+        // Enter ღილაკზე დაჭერისასაც რომ გაიგზავნოს პაროლი
+        document.getElementById("login-password").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                submitLogin();
+            }
+        });
+
         if (typeof cef !== 'undefined') {
-            
-            // HUD განახლება
+
+            // --- ავტორიზაციის ივენთები ---
+            cef.on("showLoginPanel", function(playerName, attempts) {
+                document.getElementById("login-overlay").style.display = "flex";
+                document.getElementById("login-username").innerText = playerName;
+                document.getElementById("login-attempts").innerText = "დარჩენილია " + attempts + " ცდა";
+                
+                // ფანჯრის გახსნისთანავე ველში ვსვამთ კურსორს
+                setTimeout(() => {
+                    document.getElementById("login-password").focus();
+                }, 100);
+            });
+
+            cef.on("hideLoginPanel", function() {
+                document.getElementById("login-overlay").style.display = "none";
+                document.getElementById("login-password").value = ""; // ვასუფთავებთ ველს უსაფრთხოებისთვის
+            });
+
+            // --- HUD ივენთები ---
             cef.on("updateHUD", function(hp, armor, cash, bank, weaponid, myid, online, job, rank) {
+                
                 if(hp < lastHp) playAnim('hud-hp-text', 'anim-red');
                 else if(hp > lastHp) playAnim('hud-hp-text', 'anim-green');
                 document.getElementById('hud-hp-fill').style.width = hp + '%';
@@ -222,65 +353,15 @@
                 document.getElementById('hud-online').innerText = online;
                 document.getElementById('hud-job').innerText = job.toUpperCase();
                 document.getElementById('hud-rank').innerText = rank;
-                
-                if(weaponid === 0) {
-                    document.getElementById('hud-weapon').style.display = "none";
-                    document.getElementById('hud-fist').style.display = "block";
-                } else {
-                    document.getElementById('hud-fist').style.display = "none";
-                    document.getElementById('hud-weapon').style.display = "block";
-                    document.getElementById('hud-weapon').src = "https://assets.open.mp/assets/images/weapons/" + weaponid + ".png";
-                    document.getElementById('hud-weapon').onerror = function() { this.src = "weapons/" + weaponid + ".png"; };
-                }
+                document.getElementById('hud-weapon').src = "weapons/" + weaponid + ".png";
             });
 
-            // ტაიმერი
-            cef.on("updateGift", function(hours, minutes) {
-                let m = minutes < 10 ? "0" + minutes : minutes;
-                document.getElementById('hud-gift-time').innerText = hours + "H " + m + "M";
-            });
-
-            // სპიდომეტრი
-            cef.on("updateSpeedo", function(speed, fuel, veh_hp, engine, lights, doors, in_veh) {
+            cef.on("updateSpeedo", function(speed, fuel, vhp, eng, light, door, in_veh) {
                 const sp = document.getElementById("speedometer");
                 if (!in_veh) { sp.style.display = "none"; return; }
-                sp.style.display = "flex"; 
+                sp.style.display = "block";
                 document.getElementById("speed").innerText = speed.toString().padStart(3, '0');
                 document.getElementById("fuel").innerText = fuel;
-                document.getElementById("veh-hp").innerText = Math.floor(veh_hp);
-                document.getElementById("ind-engine").className = "fas fa-cogs indicator " + (engine ? "on" : "");
-                document.getElementById("ind-lights").className = "fas fa-lightbulb indicator " + (lights ? "on" : "");
-                document.getElementById("ind-doors").className = doors ? "fas fa-lock indicator on" : "fas fa-lock-open indicator warning";
-            });
-
-            // --- ნოთიფიკაციების სისტემა (ახალი) ---
-            cef.on("showNotify", function(type, text) {
-                // ვასუფთავებთ SA-MP ფერის კოდებს ტექსტიდან
-                const cleanText = text.replace(/\{[A-Fa-f0-9]{6}\}/g, '');
-
-                const container = document.getElementById("notify-container");
-                const notif = document.createElement("div");
-                notif.className = "notify-item anim-slide-in";
-
-                let iconClass = "", typeClass = "";
-                switch(type) {
-                    case 1: iconClass = "fa-check-circle"; typeClass = "notify-success"; break;
-                    case 2: iconClass = "fa-times-circle"; typeClass = "notify-error"; break;
-                    case 3: iconClass = "fa-info-circle"; typeClass = "notify-info"; break;
-                    case 4: iconClass = "fa-exclamation-triangle"; typeClass = "notify-warning"; break;
-                    default: iconClass = "fa-bell"; typeClass = "notify-info";
-                }
-
-                notif.classList.add(typeClass);
-                notif.innerHTML = `<i class="fas ${iconClass} notify-icon"></i><div class="notify-text">${cleanText}</div>`;
-
-                container.appendChild(notif);
-
-                // 4 წამის მერე წაიშლება
-                setTimeout(() => {
-                    notif.classList.replace("anim-slide-in", "anim-fade-out");
-                    setTimeout(() => notif.remove(), 300);
-                }, 4000);
             });
         }
     </script>
