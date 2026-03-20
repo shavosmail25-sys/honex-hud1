@@ -8,7 +8,6 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: transparent; }
         
-        /* === HUD და ლოგო === */
         .server-name { position: absolute; top: 15px; right: 25px; font-family: 'Montserrat', sans-serif; font-size: 18px; background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transform: skewX(-15deg); font-weight: 900; z-index: 100; }
         #hud-container { position: absolute; top: 50px; right: 25px; display: flex; flex-direction: column; align-items: flex-end; transform: skewX(-15deg); }
         .money-wrapper { font-size: 32px; color: #2ecc71; text-shadow: 2px 2px 0px rgba(0,0,0,0.9); margin-bottom: 5px; transition: transform 0.2s ease, color 0.2s ease; }
@@ -22,7 +21,6 @@
         .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
         .ammo { font-size: 14px; color: #f39c12; }
 
-        /* === Gift და Speedo === */
         #gift-container { position: absolute; top: 15px; right: 230px; display: none; align-items: center; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(241, 196, 15, 0.4); padding: 4px 15px; border-radius: 4px; transform: skewX(-15deg); box-shadow: 0 0 20px rgba(0, 0, 0, 0.6); z-index: 101; }
         .gift-icon { color: #f1c40f; font-size: 16px; margin-right: 10px; transform: skewX(15deg); filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5)); }
         .gift-time { color: #fff; font-family: 'Oswald', sans-serif; font-size: 17px; font-weight: 700; transform: skewX(15deg); letter-spacing: 1px; }
@@ -33,12 +31,12 @@
         .speedo-stats { display: flex; gap: 20px; font-size: 15px; color: #fff; margin-bottom: 8px; }
         .speedo-indicators { display: flex; justify-content: space-between; font-size: 18px; }
 
-        /* === რეგისტრაციის ფანჯარა === */
         #register-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); 
             background: rgba(10, 10, 10, 0.95); border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; 
             padding: 40px; width: 400px; box-shadow: 0 0 30px rgba(0,0,0,0.8); 
-            display: block; z-index: 9999; 
+            display: block; /* <--- გასწორდა !important-ის გარეშე */
+            z-index: 9999; 
         }
         #register-box .content { transform: skewX(5deg); }
         .logo-reg { text-align: center; margin-bottom: 30px; }
@@ -55,7 +53,6 @@
         .submit-btn:hover { transform: scale(1.02); }
         .error-msg { color: #e74c3c; font-size: 12px; text-align: center; margin-top: 15px; min-height: 15px; font-weight: bold; }
 
-        /* === სკინის არჩევის პანელი === */
         #skin-box {
             position: absolute; left: 50px; top: 50%; transform: translateY(-50%) skewX(-5deg);
             background: rgba(10, 10, 10, 0.95); border-left: 3px solid #f1c40f;
@@ -144,10 +141,11 @@
                 grid.innerHTML = ''; 
                 const skinsToShow = (gender === 1) ? maleSkins : femaleSkins;
 
+                // ახალი, მუშა ლინკები სკინებისთვის!
                 skinsToShow.forEach(skinId => {
                     grid.innerHTML += `
                         <div class="skin-card" onclick="selectSkin(${skinId})">
-                            <img src="https://assets.open.mp/images/skins/${skinId}.png" alt="Skin">
+                            <img src="https://wiki.sa-mp.cc/images/Skin_${skinId}.png" alt="Skin">
                             <button class="skin-btn">არჩევა</button>
                         </div>
                     `;
@@ -179,7 +177,9 @@
             if(pass.length < 4 || pass.length > 30) { errorBox.innerText = "პაროლი 4-30 სიმბოლო!"; return; }
             if(!mail.includes('@')) { errorBox.innerText = "არასწორი მეილი!"; return; }
             errorBox.innerText = "იგზავნება...";
-            if (typeof cef !== 'undefined') { cef.emit("cef_server_onRegisterInput", pass, mail, selectedGender); }
+            
+            // ვაგზავნით პაროლის სიგრძესაც, რომ სერვერმა ზუსტად იცოდეს სად დაუსვას წერტილი!
+            if (typeof cef !== 'undefined') { cef.emit("cef_server_onRegisterInput", pass, pass.length, mail, selectedGender); }
         }
 
         function selectSkin(skinId) {
