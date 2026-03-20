@@ -36,25 +36,19 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         }
 
-        /* --- HUD კონტეინერი --- */
+        /* --- HUD --- */
         .hud-wrapper {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 280px; /* ოდნავ გავზარდეთ სახელის გამო */
+            width: 280px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        /* სერვერის სახელი - HONEX ROLEPLAY */
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 5px;
-        }
-
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 0 5px; }
+        
         .server-name {
             font-family: 'Orbitron', sans-serif;
             font-size: 20px;
@@ -66,123 +60,42 @@
             text-transform: uppercase;
         }
 
-        .stats-group {
-            display: flex;
-            gap: 5px;
-        }
+        .stats-group { display: flex; gap: 5px; }
+        .stat-box { padding: 4px 8px; font-size: 13px; font-weight: bold; background: rgba(0, 0, 0, 0.5); border-radius: 4px; border: 1px solid var(--glass-border); }
 
-        .stat-box {
-            padding: 4px 8px;
-            font-size: 13px;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 4px;
-            border: 1px solid var(--glass-border);
-        }
-
-        /* იარაღი და ბარები */
-        .status-card {
-            padding: 12px;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
+        .status-card { padding: 12px; display: flex; gap: 12px; align-items: center; }
+        
         .weapon-box {
-            width: 55px;
-            height: 55px;
+            width: 55px; height: 55px;
             background: rgba(0,0,0,0.6);
             border: 1px solid var(--dark-gold);
             border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             box-shadow: inset 0 0 15px rgba(255, 204, 0, 0.15);
         }
 
-        .bar-wrapper {
-            position: relative;
-            height: 16px;
-            background: rgba(0,0,0,0.7);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 6px;
-        }
-
-        .bar-fill {
-            height: 100%;
-            transition: width 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
-
+        .bars-container { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
+        .bar-row { display: flex; align-items: center; gap: 8px; }
+        .bar-icon { color: var(--main-gold); font-size: 14px; width: 16px; text-align: center; }
+        
+        .bar-wrapper { position: relative; height: 16px; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; flex-grow: 1; }
+        .bar-fill { height: 100%; transition: width 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         .hp-fill { background: linear-gradient(90deg, #991b1b, #f87171); }
         .armor-fill { background: linear-gradient(90deg, #374151, #d1d5db); }
+        .bar-text { position: absolute; width: 100%; text-align: center; top: 1px; font-size: 10px; font-weight: 900; font-family: 'Orbitron', sans-serif; text-shadow: 1px 1px 2px black; }
 
-        .bar-text {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            top: 1px;
-            font-size: 10px;
-            font-weight: 900;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 1px 1px 2px black;
-        }
+        .role-badge { background: linear-gradient(135deg, rgba(255, 204, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%); border-right: 4px solid var(--main-gold); padding: 8px 12px; text-align: right; border-radius: 4px; box-shadow: -5px 0 15px rgba(0,0,0,0.3); }
+        .role-name { font-size: 18px; font-weight: 800; color: var(--main-gold); text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 8px var(--glow-gold); margin: 0; }
+        .role-rank { font-size: 12px; color: #ffffff; opacity: 0.8; font-weight: 500; margin: 0; font-style: italic; }
 
-        /* პროფესიის სექცია */
-        .role-badge {
-            background: linear-gradient(135deg, rgba(255, 204, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
-            border-right: 4px solid var(--main-gold);
-            padding: 8px 12px;
-            text-align: right;
-            border-radius: 4px;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
-        }
-
-        .role-name { 
-            font-size: 18px; 
-            font-weight: 800; 
-            color: var(--main-gold); 
-            text-transform: uppercase; 
-            letter-spacing: 1px;
-            text-shadow: 0 0 8px var(--glow-gold);
-            margin: 0;
-        }
-
-        .role-rank {
-            font-size: 12px;
-            color: #ffffff;
-            opacity: 0.8;
-            font-weight: 500;
-            margin: 0;
-            font-style: italic;
-        }
-
-        /* ფული */
-        .money-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .money-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border-left: 4px solid var(--main-gold);
-        }
-
-        .amount {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 18px;
-            font-weight: 700;
-        }
-
+        .money-group { display: flex; flex-direction: column; gap: 6px; }
+        .money-box { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-left: 4px solid var(--main-gold); }
+        .money-box i { color: var(--main-gold); margin-right: 10px; }
+        .amount { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700; }
         .cash-amount { color: #4ade80; }
         .bank-amount { color: #60a5fa; }
 
-        /* --- სპიდომეტრი --- */
+        /* --- სპიდომეტრი სრულად აღდგენილი --- */
         #speedometer {
             position: absolute;
             bottom: 30px;
@@ -192,27 +105,29 @@
             padding: 15px 25px;
             transform: skewX(-15deg);
             display: none;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            font-family: 'Montserrat', sans-serif;
         }
 
-        .speed-val {
-            font-size: 52px;
-            font-weight: 900;
-            color: var(--main-gold);
-            text-shadow: 3px 3px 0px black;
-        }
+        .speedo-content { transform: skewX(15deg); display: flex; flex-direction: column; gap: 8px; }
+        .speed-section { display: flex; align-items: baseline; gap: 5px; }
+        .speed-val { font-size: 52px; font-weight: 900; color: var(--main-gold); text-shadow: 3px 3px 0px black; line-height: 1; }
+        .speed-unit { font-size: 16px; font-weight: 800; color: #bdc3c7; }
+        
+        .info-section { display: flex; gap: 15px; font-size: 16px; font-weight: 800; }
+        .info-item { display: flex; align-items: center; gap: 5px; }
+        .info-item i { color: var(--main-gold); }
+        
+        .indicators { display: flex; gap: 15px; font-size: 18px; margin-top: 5px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 10px; }
+        .indicator { transition: color 0.3s; color: #7f8c8d; }
+        .indicator.on { color: #2ecc71; text-shadow: 0 0 10px #2ecc71; }
+        .indicator.warning { color: #e74c3c; text-shadow: 0 0 10px #e74c3c; }
 
         /* --- ანიმაციები --- */
-        @keyframes flashRed {
-            0% { transform: scale(1); color: inherit; }
-            50% { transform: scale(1.1); color: #ff4d4d; }
-            100% { transform: scale(1); color: inherit; }
-        }
-        @keyframes flashGreen {
-            0% { transform: scale(1); color: inherit; }
-            50% { transform: scale(1.1); color: #2ecc71; }
-            100% { transform: scale(1); color: inherit; }
-        }
-
+        @keyframes flashRed { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #ff4d4d; } 100% { transform: scale(1); } }
+        @keyframes flashGreen { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #2ecc71; } 100% { transform: scale(1); } }
         .anim-red { animation: flashRed 0.4s ease-in-out; }
         .anim-green { animation: flashGreen 0.4s ease-in-out; }
 
@@ -224,23 +139,24 @@
         <div class="header-top">
             <div class="server-name">HONEX RP</div>
             <div class="stats-group">
-                <div class="stat-box">👥 <span id="hud-online">0</span></div>
-                <div class="stat-box">🆔 <span id="hud-myid">0</span></div>
+                <div class="stat-box"><i class="fas fa-users"></i> <span id="hud-online">0</span></div>
+                <div class="stat-box">ID: <span id="hud-myid">0</span></div>
             </div>
         </div>
 
         <div class="status-card glass-panel">
             <div class="weapon-box">
-                <img id="hud-weapon" src="weapons/0.png" style="width:85%;" alt="">
+                <i id="hud-fist" class="fas fa-hand-rock" style="font-size: 28px; color: var(--main-gold);"></i>
+                <img id="hud-weapon" src="" style="width:85%; display:none;" alt="">
             </div> 
             <div class="bars-container">
-                <div class="bar-wrapper">
-                    <div class="bar-fill hp-fill" id="hud-hp-fill"></div>
-                    <span class="bar-text" id="hud-hp-text">100 HP</span>
+                <div class="bar-row">
+                    <i class="fas fa-heart bar-icon"></i>
+                    <div class="bar-wrapper"><div class="bar-fill hp-fill" id="hud-hp-fill"></div><span class="bar-text" id="hud-hp-text">100 HP</span></div>
                 </div>
-                <div class="bar-wrapper">
-                    <div class="bar-fill armor-fill" id="hud-armor-fill"></div>
-                    <span class="bar-text" id="hud-armor-text">0 AP</span>
+                <div class="bar-row">
+                    <i class="fas fa-shield-alt bar-icon"></i>
+                    <div class="bar-wrapper"><div class="bar-fill armor-fill" id="hud-armor-fill"></div><span class="bar-text" id="hud-armor-text">0 AP</span></div>
                 </div>
             </div>
         </div>
@@ -251,23 +167,25 @@
         </div>
 
         <div class="money-group">
-            <div class="money-box glass-panel">
-                <span>💳 BANK</span>
-                <span class="amount bank-amount" id="hud-bank">$ 0</span>
-            </div>
-            <div class="money-box glass-panel">
-                <span>💵 CASH</span>
-                <span class="amount cash-amount" id="hud-cash">$ 0</span>
-            </div>
+            <div class="money-box glass-panel"><span><i class="fas fa-university"></i> BANK</span><span class="amount bank-amount" id="hud-bank">$ 0</span></div>
+            <div class="money-box glass-panel"><span><i class="fas fa-wallet"></i> CASH</span><span class="amount cash-amount" id="hud-cash">$ 0</span></div>
         </div>
     </div>
 
     <div id="speedometer">
-        <div style="transform: skewX(15deg); text-align:right;">
-            <div id="speed" class="speed-val">000</div>
-            <div style="font-size:14px; letter-spacing:2px; font-weight:900;">KM/H</div>
-            <div style="margin-top:10px; font-weight:800; color:#f1c40f;">
-                <i class="fas fa-gas-pump"></i> <span id="fuel">100</span>L
+        <div class="speedo-content">
+            <div class="speed-section">
+                <span id="speed" class="speed-val">000</span>
+                <span class="speed-unit">KM/H</span>
+            </div>
+            <div class="info-section">
+                <div class="info-item"><i class="fas fa-gas-pump"></i> <span id="fuel">100</span>L</div>
+                <div class="info-item"><i class="fas fa-wrench"></i> <span id="veh-hp">1000</span></div>
+            </div>
+            <div class="indicators">
+                <i id="ind-engine" class="fas fa-cogs indicator"></i>
+                <i id="ind-lights" class="fas fa-lightbulb indicator"></i>
+                <i id="ind-doors" class="fas fa-lock-open indicator warning"></i>
             </div>
         </div>
     </div>
@@ -286,41 +204,60 @@
         if (typeof cef !== 'undefined') {
             cef.on("updateHUD", function(hp, armor, cash, bank, weaponid, myid, online, job, rank) {
                 
-                // HP ანიმაცია
                 if(hp < lastHp) playAnim('hud-hp-text', 'anim-red');
                 else if(hp > lastHp) playAnim('hud-hp-text', 'anim-green');
                 document.getElementById('hud-hp-fill').style.width = hp + '%';
                 document.getElementById('hud-hp-text').innerText = Math.round(hp) + ' HP';
                 lastHp = hp;
 
-                // ფულის ანიმაცია
                 if(cash < lastCash) playAnim('hud-cash', 'anim-red');
                 else if(cash > lastCash) playAnim('hud-cash', 'anim-green');
                 document.getElementById('hud-cash').innerText = '$ ' + cash.toLocaleString();
                 lastCash = cash;
 
-                // ბანკის ანიმაცია
                 if(bank < lastBank) playAnim('hud-bank', 'anim-red');
                 else if(bank > lastBank) playAnim('hud-bank', 'anim-green');
                 document.getElementById('hud-bank').innerText = '$ ' + bank.toLocaleString();
                 lastBank = bank;
 
-                // დანარჩენი
                 document.getElementById('hud-armor-fill').style.width = armor + '%';
                 document.getElementById('hud-armor-text').innerText = Math.round(armor) + ' AP';
                 document.getElementById('hud-myid').innerText = myid;
                 document.getElementById('hud-online').innerText = online;
                 document.getElementById('hud-job').innerText = job.toUpperCase();
                 document.getElementById('hud-rank').innerText = rank;
-                document.getElementById('hud-weapon').src = "weapons/" + weaponid + ".png";
+                
+                // ულტრა-ჭკვიანი იარაღის ლოგიკა
+                if(weaponid === 0) {
+                    document.getElementById('hud-weapon').style.display = "none";
+                    document.getElementById('hud-fist').style.display = "block";
+                } else {
+                    document.getElementById('hud-fist').style.display = "none";
+                    document.getElementById('hud-weapon').style.display = "block";
+                    // ონლაინ ბაზიდან ჩატვირთვა
+                    document.getElementById('hud-weapon').src = "https://assets.open.mp/assets/images/weapons/" + weaponid + ".png";
+                    // თუ ონლაინ ვერ იპოვა, გადართავს შენს ლოკალურ ფაილზე
+                    document.getElementById('hud-weapon').onerror = function() {
+                        this.src = "weapons/" + weaponid + ".png";
+                    };
+                }
             });
 
-            cef.on("updateSpeedo", function(speed, fuel, vhp, eng, light, door, in_veh) {
+            cef.on("updateSpeedo", function(speed, fuel, veh_hp, engine, lights, doors, in_veh) {
                 const sp = document.getElementById("speedometer");
                 if (!in_veh) { sp.style.display = "none"; return; }
-                sp.style.display = "block";
+                
+                // display: flex აუცილებელია, რომ სტრუქტურა შენარჩუნდეს
+                sp.style.display = "flex"; 
+                
                 document.getElementById("speed").innerText = speed.toString().padStart(3, '0');
                 document.getElementById("fuel").innerText = fuel;
+                document.getElementById("veh-hp").innerText = Math.floor(veh_hp);
+
+                // ინდიკატორების ფერების ცვლილება
+                document.getElementById("ind-engine").className = "fas fa-cogs indicator " + (engine ? "on" : "");
+                document.getElementById("ind-lights").className = "fas fa-lightbulb indicator " + (lights ? "on" : "");
+                document.getElementById("ind-doors").className = doors ? "fas fa-lock indicator on" : "fas fa-lock-open indicator warning";
             });
         }
     </script>
