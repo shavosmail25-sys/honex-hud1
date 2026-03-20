@@ -3,39 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Forge Gold HUD</title>
+    <title>Code Forge Premium HUD & Speedo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap');
+        /* მთავარი შესწორება: 100% გამჭვირვალე ეკრანი! */
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: transparent !important;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Rajdhani', sans-serif;
+            color: white;
+        }
 
         :root {
-            /* მთავარი ოქროსფერი პალიტრა */
             --main-gold: #ffcc00;
             --dark-gold: #b38f00;
             --glow-gold: rgba(255, 204, 0, 0.4);
             --glass-bg: rgba(15, 15, 18, 0.85);
             --glass-border: rgba(255, 204, 0, 0.3);
-            --hp-color: #ff4d4d; /* სიცოცხლე - წითელი */
-            --armor-color: #e6e6e6; /* ჯავშანი - თეთრი/ნაცრისფერი */
-        }
-
-        body {
-            background-color: #1a1e24; /* სატესტო ფონი */
-            margin: 0;
-            padding: 20px;
-            font-family: 'Rajdhani', sans-serif;
-            color: white;
-            display: flex;
-            justify-content: flex-end;
-            align-items: flex-start;
-            height: 100vh;
-        }
-
-        /* ზომების შემცირება: სიგანე ახლა 260px-ია (იყო 380px) */
-        .hud-wrapper {
-            width: 260px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            --hp-color: #ff4d4d;
+            --armor-color: #e6e6e6;
         }
 
         .glass-panel {
@@ -45,134 +37,75 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         }
 
-        /* === ლოგო და ზედა სტატუსი === */
-        .header-top {
+        /* ================= HUD (ზედა მარჯვენა კუთხე) ================= */
+        .hud-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 260px;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 0 5px;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .logo-container { line-height: 0.9; }
-        .logo-code { font-size: 12px; letter-spacing: 1px; color: #ccc; }
-        .logo-forge {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 22px; /* დაპატარავდა */
-            font-weight: 700;
-            color: var(--main-gold);
-            text-shadow: 0 0 8px var(--glow-gold);
-            font-style: italic;
-        }
-
-        .stats-group {
-            display: flex;
-            gap: 5px;
-            font-size: 12px;
-        }
-
-        .stat-box {
-            padding: 4px 8px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
+        .header-top { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 5px; }
+        .logo-code { font-size: 12px; letter-spacing: 1px; color: #ccc; display: block; line-height: 0.9;}
+        .logo-forge { font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 700; color: var(--main-gold); text-shadow: 0 0 8px var(--glow-gold); font-style: italic; line-height: 0.9;}
+        
+        .stats-group { display: flex; gap: 5px; font-size: 12px; }
+        .stat-box { padding: 4px 8px; display: flex; align-items: center; gap: 4px; }
         .stat-box span { color: #aaa; }
 
-        /* === იარაღი, HP და ARMOR სექცია === */
-        .status-card {
-            padding: 10px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        .status-card { padding: 10px; display: flex; gap: 10px; align-items: center; }
+        .weapon-box { width: 50px; height: 50px; background: rgba(0,0,0,0.5); border: 1px solid var(--dark-gold); border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.1); }
+        
+        .bars-container { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
+        .bar-wrapper { position: relative; height: 14px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 0.3s; }
+        .hp-fill { background: var(--hp-color); width: 100%; }
+        .armor-fill { background: var(--armor-color); width: 100%; }
+        .bar-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; font-family: 'Orbitron', sans-serif; text-shadow: 1px 1px 2px black; }
 
-        /* იარაღის (Fist) ყუთი */
-        .weapon-box {
-            width: 50px;
-            height: 50px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid var(--dark-gold);
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.1);
-        }
+        .role-info { text-align: right; padding: 0 5px; margin-top: -4px; margin-bottom: 4px; }
+        .role-name { font-size: 16px; font-weight: bold; color: var(--main-gold); margin: 0; }
+        .role-rank { font-size: 12px; color: #aaa; margin: 0; }
 
-        .bars-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+        .money-group { display: flex; flex-direction: column; gap: 6px; }
+        .money-box { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-left: 3px solid var(--main-gold); }
+        .amount { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+        .bank-amount { color: #a3e4d7; }
+        .cash-amount { color: #82e0aa; }
 
-        .bar-wrapper {
-            position: relative;
-            height: 14px;
-            background: rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .bar-fill {
-            height: 100%;
-            transition: width 0.3s;
-        }
-
-        .hp-fill { background: var(--hp-color); width: 85%; }
-        .armor-fill { background: var(--armor-color); width: 45%; }
-
-        .bar-text {
+        /* ================= SPEEDOMETER (ქვედა მარჯვენა კუთხე) ================= */
+        #speedometer {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 10px;
-            font-weight: bold;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 1px 1px 2px black;
-        }
-
-        /* პერსონაჟის ინფო */
-        .role-info {
-            text-align: right;
-            padding: 0 5px;
-            margin-top: -4px;
-            margin-bottom: 4px;
-        }
-        .role-info p { margin: 0; line-height: 1.2; }
-        .role-name { font-size: 16px; font-weight: bold; color: var(--main-gold); }
-        .role-rank { font-size: 12px; color: #aaa; }
-
-        /* === ფულის სექცია === */
-        .money-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .money-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.6);
             border-left: 3px solid var(--main-gold);
+            padding: 15px 25px;
+            transform: skewX(-15deg);
+            display: none; /* მანქანაში ჩაჯდომამდე დამალულია */
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            font-family: 'Montserrat', sans-serif;
         }
 
-        .money-icon { font-size: 16px; }
+        .speedo-content { transform: skewX(15deg); display: flex; flex-direction: column; gap: 8px; }
+        
+        .speed-section { display: flex; align-items: baseline; gap: 5px; }
+        .speed-val { font-size: 48px; font-weight: 900; color: var(--main-gold); text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.9); line-height: 1; }
+        .speed-unit { font-size: 16px; font-weight: 800; color: #bdc3c7; }
 
-        .amount {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 16px; /* დაპატარავდა */
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
+        .info-section { display: flex; gap: 15px; font-size: 16px; font-weight: 800; }
+        .info-item { display: flex; align-items: center; gap: 5px; }
+        .info-item i { color: var(--main-gold); }
 
-        .bank-amount { color: #a3e4d7; } /* ბანკის ფული ოდნავ მოცისფრო/თეთრი */
-        .cash-amount { color: #82e0aa; } /* ხელზე ფული მწვანე */
+        .indicators { display: flex; gap: 15px; font-size: 18px; margin-top: 5px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 10px; }
+        .indicator { transition: color 0.3s; color: #7f8c8d; }
+        .indicator.on { color: #2ecc71; }
+        .indicator.warning { color: #e74c3c; }
 
     </style>
 </head>
@@ -192,15 +125,14 @@
 
         <div class="status-card glass-panel">
             <div class="weapon-box">✊</div> 
-            
             <div class="bars-container">
                 <div class="bar-wrapper">
-                    <div class="bar-fill hp-fill"></div>
-                    <span class="bar-text">85 HP</span>
+                    <div class="bar-fill hp-fill" id="hud-hp-fill"></div>
+                    <span class="bar-text" id="hud-hp-text">100 HP</span>
                 </div>
                 <div class="bar-wrapper">
-                    <div class="bar-fill armor-fill"></div>
-                    <span class="bar-text">45 AP</span>
+                    <div class="bar-fill armor-fill" id="hud-armor-fill"></div>
+                    <span class="bar-text" id="hud-armor-text">0 AP</span>
                 </div>
             </div>
         </div>
@@ -213,15 +145,68 @@
         <div class="money-group">
             <div class="money-box glass-panel">
                 <span class="money-icon">💳 ბანკი</span>
-                <span class="amount bank-amount">$ 55.200.186</span>
+                <span class="amount bank-amount" id="hud-bank">$ 0</span>
             </div>
-
             <div class="money-box glass-panel">
                 <span class="money-icon">💵 ხელზე</span>
-                <span class="amount cash-amount">$ 108.956</span>
+                <span class="amount cash-amount" id="hud-cash">$ 0</span>
             </div>
         </div>
     </div>
 
+    <div id="speedometer">
+        <div class="speedo-content">
+            <div class="speed-section">
+                <span id="speed" class="speed-val">000</span>
+                <span class="speed-unit">KM/H</span>
+            </div>
+            <div class="info-section">
+                <div class="info-item"><i class="fas fa-gas-pump"></i> <span id="fuel">100</span>L</div>
+                <div class="info-item"><i class="fas fa-wrench"></i> <span id="veh-hp">1000</span></div>
+            </div>
+            <div class="indicators">
+                <i id="ind-engine" class="fas fa-cogs indicator"></i>
+                <i id="ind-lights" class="fas fa-lightbulb indicator"></i>
+                <i id="ind-doors" class="fas fa-lock-open indicator warning"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (typeof cef !== 'undefined') {
+            
+            // HUD მონაცემების მიღება
+            cef.on("updateHUD", function(hp, armor, cash, bank) {
+                document.getElementById('hud-hp-fill').style.width = hp + '%';
+                document.getElementById('hud-hp-text').innerText = Math.round(hp) + ' HP';
+                
+                document.getElementById('hud-armor-fill').style.width = armor + '%';
+                document.getElementById('hud-armor-text').innerText = Math.round(armor) + ' AP';
+                
+                document.getElementById('hud-cash').innerText = '$ ' + cash.toLocaleString();
+                document.getElementById('hud-bank').innerText = '$ ' + bank.toLocaleString();
+            });
+
+            // სპიდომეტრის მონაცემების მიღება
+            cef.on("updateSpeedo", function(speed, fuel, veh_hp, engine, lights, doors, in_veh) {
+                const speedo = document.getElementById("speedometer");
+                
+                if (!in_veh) {
+                    speedo.style.display = "none";
+                    return;
+                }
+                
+                speedo.style.display = "flex";
+
+                document.getElementById("speed").innerText = speed.toString().padStart(3, '0');
+                document.getElementById("fuel").innerText = fuel;
+                document.getElementById("veh-hp").innerText = Math.floor(veh_hp);
+
+                document.getElementById("ind-engine").className = "fas fa-cogs indicator " + (engine ? "on" : "");
+                document.getElementById("ind-lights").className = "fas fa-lightbulb indicator " + (lights ? "on" : "");
+                document.getElementById("ind-doors").className = doors ? "fas fa-lock indicator on" : "fas fa-lock-open indicator warning";
+            });
+        }
+    </script>
 </body>
 </html>
