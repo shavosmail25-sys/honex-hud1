@@ -8,8 +8,9 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: transparent; }
         
-        .server-name { position: absolute; top: 15px; right: 25px; font-family: 'Montserrat', sans-serif; font-size: 18px; background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transform: skewX(-15deg); font-weight: 900; z-index: 100; display: none; }
-        #hud-container { position: absolute; top: 50px; right: 25px; display: none; flex-direction: column; align-items: flex-end; transform: skewX(-15deg); }
+        /* === HUD და ლოგო (თავიდანვე ჩანს!) === */
+        .server-name { position: absolute; top: 15px; right: 25px; font-family: 'Montserrat', sans-serif; font-size: 18px; background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transform: skewX(-15deg); font-weight: 900; z-index: 100; display: block; }
+        #hud-container { position: absolute; top: 50px; right: 25px; display: flex; flex-direction: column; align-items: flex-end; transform: skewX(-15deg); }
         .money-wrapper { font-size: 32px; color: #2ecc71; text-shadow: 2px 2px 0px rgba(0,0,0,0.9); margin-bottom: 5px; transition: transform 0.2s ease, color 0.2s ease; }
         .money-update { transform: scale(1.1); color: #27ae60; }
         .stat-item { display: flex; align-items: center; margin-bottom: 5px; background: rgba(0, 0, 0, 0.5); padding: 3px 10px; }
@@ -32,6 +33,7 @@
         .speedo-stats { display: flex; gap: 20px; font-size: 15px; color: #fff; margin-bottom: 8px; }
         .speedo-indicators { display: flex; justify-content: space-between; font-size: 18px; }
 
+        /* === ფანჯრები დამალულია === */
         #register-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); display: none; z-index: 9999; width: 400px; padding: 40px; border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; }
         #skin-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); display: none; z-index: 9999; width: 380px; padding: 25px; border-left: 3px solid #f1c40f; }
         
@@ -119,6 +121,9 @@
             cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => { updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh); });
             
             cef.on("showRegisterWindow", () => {
+                // ვმალავთ HUD-ს და ვაჩენთ რეგისტრაციას
+                document.getElementById('hud-container').style.display = 'none';
+                document.getElementById('logo-main').style.display = 'none';
                 document.getElementById('register-box').style.display = 'block';
             });
 
@@ -140,7 +145,6 @@
                 });
             });
 
-            // მთავარი მაშველი ფუნქცია! სერვერიდან რომ ვეტყვით, ეგრევე გაანათებს HUD-ს
             cef.on("showHud", () => {
                 document.getElementById('register-box').style.display = 'none';
                 document.getElementById('skin-box').style.display = 'none';
