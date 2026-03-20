@@ -21,7 +21,7 @@
 
         .glass-panel { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 5px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5); }
         
-        /* HUD ზომა შემცირდა 280px-დან 235px-მდე */
+        /* HUD */
         .hud-wrapper { position: absolute; top: 15px; right: 15px; width: 235px; display: flex; flex-direction: column; gap: 7px; }
 
         /* HEADER */
@@ -68,7 +68,7 @@
         .gift-icon { color: #e74c3c; margin-right: 6px; animation: pulseGift 1.5s infinite; }
         .gift-time { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; color: #fff; text-shadow: 0 0 6px #e74c3c; }
 
-        /* SPEEDOMETER - დაპატარავებული */
+        /* SPEEDOMETER */
         #speedometer { position: absolute; bottom: 25px; right: 25px; background: rgba(0, 0, 0, 0.7); border-left: 3px solid var(--main-gold); padding: 12px 20px; transform: skewX(-15deg); display: none; flex-direction: column; gap: 7px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; }
         .speedo-content { transform: skewX(15deg); display: flex; flex-direction: column; gap: 6px; }
         .speed-section { display: flex; align-items: baseline; gap: 4px; }
@@ -82,6 +82,37 @@
         .indicator.on { color: #2ecc71; text-shadow: 0 0 8px #2ecc71; }
         .indicator.warning { color: #e74c3c; text-shadow: 0 0 8px #e74c3c; }
 
+        /* --- NOTIFICATION SYSTEM (ახალი) --- */
+        .notify-item {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(15, 15, 18, 0.95); border-radius: 6px;
+            padding: 12px 20px; min-width: 250px; max-width: 450px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+            font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700;
+        }
+        
+        .notify-success { border-bottom: 3px solid #2ecc71; }
+        .notify-success .notify-icon { color: #2ecc71; text-shadow: 0 0 8px #2ecc71; }
+        
+        .notify-error { border-bottom: 3px solid #e74c3c; }
+        .notify-error .notify-icon { color: #e74c3c; text-shadow: 0 0 8px #e74c3c; }
+        
+        .notify-info { border-bottom: 3px solid #3498db; }
+        .notify-info .notify-icon { color: #3498db; text-shadow: 0 0 8px #3498db; }
+        
+        .notify-warning { border-bottom: 3px solid var(--main-gold); }
+        .notify-warning .notify-icon { color: var(--main-gold); text-shadow: 0 0 8px var(--glow-gold); }
+
+        .notify-icon { font-size: 22px; }
+        .notify-text { color: #fff; line-height: 1.3; }
+
+        @keyframes slideDown { 0% { opacity: 0; transform: translateY(-20px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.9); } }
+        
+        .anim-slide-in { animation: slideDown 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; }
+        .anim-fade-out { animation: fadeOut 0.3s ease-in forwards; }
+
+        /* სხვა ანიმაციები */
         @keyframes pulseGift { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
         @keyframes flashRed { 0% { transform: scale(1); } 50% { transform: scale(1.08); color: #ff4d4d; } 100% { transform: scale(1); } }
         @keyframes flashGreen { 0% { transform: scale(1); } 50% { transform: scale(1.08); color: #2ecc71; } 100% { transform: scale(1); } }
@@ -91,6 +122,8 @@
     </style>
 </head>
 <body>
+
+    <div id="notify-container" style="position: fixed; top: 80px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 9999; align-items: center;"></div>
 
     <div class="hud-wrapper">
         <div class="header-top">
@@ -164,6 +197,8 @@
         }
 
         if (typeof cef !== 'undefined') {
+            
+            // HUD განახლება
             cef.on("updateHUD", function(hp, armor, cash, bank, weaponid, myid, online, job, rank) {
                 if(hp < lastHp) playAnim('hud-hp-text', 'anim-red');
                 else if(hp > lastHp) playAnim('hud-hp-text', 'anim-green');
@@ -199,11 +234,13 @@
                 }
             });
 
+            // ტაიმერი
             cef.on("updateGift", function(hours, minutes) {
                 let m = minutes < 10 ? "0" + minutes : minutes;
                 document.getElementById('hud-gift-time').innerText = hours + "H " + m + "M";
             });
 
+            // სპიდომეტრი
             cef.on("updateSpeedo", function(speed, fuel, veh_hp, engine, lights, doors, in_veh) {
                 const sp = document.getElementById("speedometer");
                 if (!in_veh) { sp.style.display = "none"; return; }
@@ -214,6 +251,36 @@
                 document.getElementById("ind-engine").className = "fas fa-cogs indicator " + (engine ? "on" : "");
                 document.getElementById("ind-lights").className = "fas fa-lightbulb indicator " + (lights ? "on" : "");
                 document.getElementById("ind-doors").className = doors ? "fas fa-lock indicator on" : "fas fa-lock-open indicator warning";
+            });
+
+            // --- ნოთიფიკაციების სისტემა (ახალი) ---
+            cef.on("showNotify", function(type, text) {
+                // ვასუფთავებთ SA-MP ფერის კოდებს ტექსტიდან
+                const cleanText = text.replace(/\{[A-Fa-f0-9]{6}\}/g, '');
+
+                const container = document.getElementById("notify-container");
+                const notif = document.createElement("div");
+                notif.className = "notify-item anim-slide-in";
+
+                let iconClass = "", typeClass = "";
+                switch(type) {
+                    case 1: iconClass = "fa-check-circle"; typeClass = "notify-success"; break;
+                    case 2: iconClass = "fa-times-circle"; typeClass = "notify-error"; break;
+                    case 3: iconClass = "fa-info-circle"; typeClass = "notify-info"; break;
+                    case 4: iconClass = "fa-exclamation-triangle"; typeClass = "notify-warning"; break;
+                    default: iconClass = "fa-bell"; typeClass = "notify-info";
+                }
+
+                notif.classList.add(typeClass);
+                notif.innerHTML = `<i class="fas ${iconClass} notify-icon"></i><div class="notify-text">${cleanText}</div>`;
+
+                container.appendChild(notif);
+
+                // 4 წამის მერე წაიშლება
+                setTimeout(() => {
+                    notif.classList.replace("anim-slide-in", "anim-fade-out");
+                    setTimeout(() => notif.remove(), 300);
+                }, 4000);
             });
         }
     </script>
