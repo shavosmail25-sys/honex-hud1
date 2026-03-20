@@ -34,7 +34,12 @@
         .speedo-indicators { display: flex; justify-content: space-between; font-size: 18px; }
 
         /* === რეგისტრაციის ფანჯარა === */
-        #register-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); background: rgba(10, 10, 10, 0.95); border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; padding: 40px; width: 400px; box-shadow: 0 0 30px rgba(0,0,0,0.8); display: block !important; 9999; }
+        #register-box { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); 
+            background: rgba(10, 10, 10, 0.95); border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; 
+            padding: 40px; width: 400px; box-shadow: 0 0 30px rgba(0,0,0,0.8); 
+            display: block; z-index: 9999; 
+        }
         #register-box .content { transform: skewX(5deg); }
         .logo-reg { text-align: center; margin-bottom: 30px; }
         .logo-reg h1 { margin: 0; font-size: 32px; font-weight: 900; background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -50,9 +55,7 @@
         .submit-btn:hover { transform: scale(1.02); }
         .error-msg { color: #e74c3c; font-size: 12px; text-align: center; margin-top: 15px; min-height: 15px; font-weight: bold; }
 
-        /* =========================================
-           სკინის არჩევის პანელი (ახალი)
-           ========================================= */
+        /* === სკინის არჩევის პანელი === */
         #skin-box {
             position: absolute; left: 50px; top: 50%; transform: translateY(-50%) skewX(-5deg);
             background: rgba(10, 10, 10, 0.95); border-left: 3px solid #f1c40f;
@@ -61,14 +64,8 @@
         }
         #skin-box .content { transform: skewX(5deg); }
         .skin-title { color: #fff; font-family: 'Oswald', sans-serif; font-size: 22px; margin-bottom: 20px; text-align: center; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .skin-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
-        }
-        .skin-card {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 5px; padding: 10px; text-align: center; cursor: pointer;
-            transition: all 0.3s ease;
-        }
+        .skin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .skin-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
         .skin-card:hover { border-color: #f1c40f; background: rgba(241, 196, 15, 0.1); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(241,196,15,0.3); }
         .skin-card img { height: 120px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
         .skin-btn { width: 100%; background: #f1c40f; color: #000; border: none; padding: 5px; font-family: 'Oswald'; font-weight: bold; cursor: pointer; transition: 0.2s; }
@@ -109,8 +106,7 @@
     <div id="skin-box">
         <div class="content">
             <div class="skin-title">აირჩიე პერსონაჟი</div>
-            <div class="skin-grid" id="skin-grid-container">
-                </div>
+            <div class="skin-grid" id="skin-grid-container"></div>
         </div>
     </div>
 
@@ -118,7 +114,6 @@
         let currentMoney = 0;
         let selectedGender = 1;
 
-        // ბომჟების სკინების ID-ები (6 კაცი, 6 ქალი)
         const maleSkins = [7, 14, 15, 18, 19, 20];
         const femaleSkins = [9, 10, 11, 12, 13, 31];
 
@@ -132,7 +127,6 @@
             cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => { updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh); });
             cef.on("updateGift", (timeStr, isVisible) => { const giftCont = document.getElementById('gift-container'); if(isVisible) { giftCont.style.display = 'flex'; document.getElementById('gift-val').innerText = timeStr; } else { giftCont.style.display = 'none'; } });
 
-            // რეგისტრაციის გამოჩენა
             cef.on("showRegisterWindow", () => {
                 document.getElementById('register-box').style.display = 'block';
                 document.getElementById('hud-container').style.display = 'none';
@@ -142,16 +136,14 @@
                 cef.emit("game:hud:setComponentVisible", 0, false); 
             });
 
-            // სკინის არჩევის გამოჩენა (რეგისტრაციის მერე)
             cef.on("showSkinSelector", (gender) => {
-                document.getElementById('register-box').style.display = 'none'; // ვმალავთ რეგისტრაციას
-                document.getElementById('skin-box').style.display = 'block'; // ვაჩენთ სკინებს
+                document.getElementById('register-box').style.display = 'none'; 
+                document.getElementById('skin-box').style.display = 'block'; 
                 
                 const grid = document.getElementById('skin-grid-container');
                 grid.innerHTML = ''; 
                 const skinsToShow = (gender === 1) ? maleSkins : femaleSkins;
 
-                // ვქმნით 6 სკინის ბარათს
                 skinsToShow.forEach(skinId => {
                     grid.innerHTML += `
                         <div class="skin-card" onclick="selectSkin(${skinId})">
@@ -162,12 +154,15 @@
                 });
             });
 
-            // სკინის არჩევის დასრულება (HUD-ის დაბრუნება)
             cef.on("hideSkinSelector", () => {
                 document.getElementById('skin-box').style.display = 'none';
                 document.getElementById('hud-container').style.display = 'flex';
                 document.getElementById('logo-main').style.display = 'block';
                 cef.emit("game:hud:setComponentVisible", 0, true); 
+            });
+            
+            cef.on("hideRegisterWindow", () => {
+                document.getElementById('register-box').style.display = 'none';
             });
         }
 
@@ -187,7 +182,6 @@
             if (typeof cef !== 'undefined') { cef.emit("cef_server_onRegisterInput", pass, mail, selectedGender); }
         }
 
-        // სკინის გაგზავნა სერვერზე
         function selectSkin(skinId) {
             if (typeof cef !== 'undefined') {
                 cef.emit("cef_server_onSkinSelect", skinId);
