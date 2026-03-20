@@ -1,207 +1,227 @@
 <!DOCTYPE html>
-<html>
+<html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Forge Gold HUD</title>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: transparent; }
-        
-        /* === HUD და ლოგო თავიდან დამალულია === */
-        .server-name { position: absolute; top: 15px; right: 25px; font-family: 'Montserrat', sans-serif; font-size: 18px; background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transform: skewX(-15deg); font-weight: 900; z-index: 100; display: none; }
-        #hud-container { position: absolute; top: 50px; right: 25px; display: none; flex-direction: column; align-items: flex-end; transform: skewX(-15deg); }
-        .money-wrapper { font-size: 32px; color: #2ecc71; text-shadow: 2px 2px 0px rgba(0,0,0,0.9); margin-bottom: 5px; transition: transform 0.2s ease, color 0.2s ease; }
-        .money-update { transform: scale(1.1); color: #27ae60; }
-        .stat-item { display: flex; align-items: center; margin-bottom: 5px; background: rgba(0, 0, 0, 0.5); padding: 3px 10px; }
-        .bar-bg { width: 150px; height: 8px; background: rgba(255,255,255,0.1); overflow: hidden; }
-        .fill { height: 100%; transition: width 0.3s ease-in-out; }
-        #hp-fill { background: linear-gradient(90deg, #d31027, #ea384d); width: 100%; } 
-        #arm-fill { background: linear-gradient(90deg, #2b5876, #4e4376); width: 0%; } 
-        .weapon-box { background: rgba(0, 0, 0, 0.6); padding: 5px 12px; border-left: 3px solid #f39c12; margin-bottom: 8px; display: flex; align-items: center; }
-        .weapon-icon { font-size: 20px; color: #fff; margin-right: 10px; transform: skewX(15deg); }
-        .ammo { font-size: 14px; color: #f39c12; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap');
 
-        #speedo-box { position: absolute; bottom: 40px; right: 40px; display: none; background: rgba(0, 0, 0, 0.7); border-bottom: 3px solid #f1c40f; padding: 10px 20px; border-radius: 5px; transform: skewX(-5deg); }
-        .speed-row { display: flex; align-items: baseline; gap: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px; }
-        #speed-val { font-size: 45px; color: #f1c40f; font-weight: bold; line-height: 1; }
-        .speedo-label { font-size: 14px; color: #ccc; }
-        .speedo-stats { display: flex; gap: 20px; font-size: 15px; color: #fff; margin-bottom: 8px; }
-        .speedo-indicators { display: flex; justify-content: space-between; font-size: 18px; }
+        :root {
+            /* მთავარი ოქროსფერი პალიტრა */
+            --main-gold: #ffcc00;
+            --dark-gold: #b38f00;
+            --glow-gold: rgba(255, 204, 0, 0.4);
+            --glass-bg: rgba(15, 15, 18, 0.85);
+            --glass-border: rgba(255, 204, 0, 0.3);
+            --hp-color: #ff4d4d; /* სიცოცხლე - წითელი */
+            --armor-color: #e6e6e6; /* ჯავშანი - თეთრი/ნაცრისფერი */
+        }
 
-        /* === რეგისტრაცია თავიდანვე ჩანს (display: block;) === */
-        #register-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); display: block; z-index: 9999; width: 400px; padding: 40px; border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; }
-        #skin-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); display: none; z-index: 9999; width: 380px; padding: 25px; border-left: 3px solid #f1c40f; }
-        
-        .content { transform: skewX(5deg); }
-        .logo-reg { text-align: center; margin-bottom: 30px; }
-        .logo-reg h1 { margin: 0; font-size: 32px; font-weight: 900; background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-reg span { color: #fff; font-family: 'Oswald', sans-serif; font-size: 14px; letter-spacing: 2px; }
-        
-        .input-group { margin-bottom: 20px; position: relative; }
-        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #f1c40f; font-size: 18px; }
-        .input-group input { width: 100%; padding: 12px 15px 12px 45px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; font-family: 'Montserrat', sans-serif; font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s;}
-        .input-group input:focus { border-color: #f1c40f; background: rgba(255, 255, 255, 0.1); }
-        
-        .gender-select { display: flex; gap: 10px; margin-bottom: 25px; }
-        .gender-btn { flex: 1; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; cursor: pointer; font-weight: bold; font-family: 'Oswald'; transition: 0.3s; }
-        .gender-btn.active { background: #f1c40f; color: #000; border-color: #f1c40f; }
-        .submit-btn { width: 100%; padding: 12px; background: linear-gradient(90deg, #f1c40f, #d35400); border: none; color: #fff; font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        .submit-btn:hover { transform: scale(1.02); }
-        .error-msg { color: #e74c3c; font-size: 12px; text-align: center; margin-top: 15px; min-height: 15px; font-weight: bold; }
+        body {
+            background-color: #1a1e24; /* სატესტო ფონი */
+            margin: 0;
+            padding: 20px;
+            font-family: 'Rajdhani', sans-serif;
+            color: white;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            height: 100vh;
+        }
 
-        .skin-title { color: #fff; font-family: 'Oswald', sans-serif; font-size: 22px; margin-bottom: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .skin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-height: 400px; overflow-y: auto; padding-right: 5px; }
-        .skin-grid::-webkit-scrollbar { width: 5px; }
-        .skin-grid::-webkit-scrollbar-thumb { background: #f1c40f; border-radius: 5px; }
-        .skin-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
-        .skin-card:hover { border-color: #f1c40f; background: rgba(241, 196, 15, 0.1); transform: translateY(-3px); }
-        .skin-card img { height: 120px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
-        .skin-btn { width: 100%; background: #f1c40f; color: #000; border: none; padding: 5px; font-family: 'Oswald'; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .skin-card:hover .skin-btn { background: #d35400; color: #fff; }
+        /* ზომების შემცირება: სიგანე ახლა 260px-ია (იყო 380px) */
+        .hud-wrapper {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* === ლოგო და ზედა სტატუსი === */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 5px;
+        }
+
+        .logo-container { line-height: 0.9; }
+        .logo-code { font-size: 12px; letter-spacing: 1px; color: #ccc; }
+        .logo-forge {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px; /* დაპატარავდა */
+            font-weight: 700;
+            color: var(--main-gold);
+            text-shadow: 0 0 8px var(--glow-gold);
+            font-style: italic;
+        }
+
+        .stats-group {
+            display: flex;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .stat-box {
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-box span { color: #aaa; }
+
+        /* === იარაღი, HP და ARMOR სექცია === */
+        .status-card {
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* იარაღის (Fist) ყუთი */
+        .weapon-box {
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--dark-gold);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.1);
+        }
+
+        .bars-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .bar-wrapper {
+            position: relative;
+            height: 14px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .hp-fill { background: var(--hp-color); width: 85%; }
+        .armor-fill { background: var(--armor-color); width: 45%; }
+
+        .bar-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* პერსონაჟის ინფო */
+        .role-info {
+            text-align: right;
+            padding: 0 5px;
+            margin-top: -4px;
+            margin-bottom: 4px;
+        }
+        .role-info p { margin: 0; line-height: 1.2; }
+        .role-name { font-size: 16px; font-weight: bold; color: var(--main-gold); }
+        .role-rank { font-size: 12px; color: #aaa; }
+
+        /* === ფულის სექცია === */
+        .money-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .money-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-left: 3px solid var(--main-gold);
+        }
+
+        .money-icon { font-size: 16px; }
+
+        .amount {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px; /* დაპატარავდა */
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .bank-amount { color: #a3e4d7; } /* ბანკის ფული ოდნავ მოცისფრო/თეთრი */
+        .cash-amount { color: #82e0aa; } /* ხელზე ფული მწვანე */
+
     </style>
 </head>
 <body>
-    <div class="server-name" id="logo-main">HONEX ROLE PLAY</div>
 
-    <div id="hud-container">
-        <div class="weapon-box"><div id="w-icon" class="weapon-icon"><i class="fas fa-hand-fist"></i></div><div class="ammo"><span id="ammo-val">0</span>/<span id="ammo-total">0</span></div></div>
-        <div class="money-wrapper" id="money-cont">$ <span id="money">0</span></div>
-        <div class="stat-item"><div class="bar-bg"><div id="hp-fill" class="fill"></div></div></div>
-        <div class="stat-item"><div class="bar-bg"><div id="arm-fill" class="fill"></div></div></div>
-    </div>
-
-    <div id="speedo-box">
-        <div class="speed-row"><div id="speed-val">000</div><div class="speedo-label">KM/H</div></div>
-        <div class="speedo-stats"><div><i class="fas fa-gas-pump" style="color:#e67e22;"></i> <span id="fuel-val">100</span>L</div><div><i class="fas fa-wrench" style="color:#95a5a6;"></i> <span id="vhp-val">100</span>%</div></div>
-        <div class="speedo-indicators"><i id="icon-engine" class="fas fa-car-battery" style="color:#e74c3c;"></i><i id="icon-lights" class="fas fa-lightbulb" style="color:#7f8c8d;"></i><i id="icon-doors" class="fas fa-lock-open" style="color:#2ecc71;"></i></div>
-    </div>
-
-    <div id="register-box">
-        <div class="content">
-            <div class="logo-reg"><h1>HONEX RP</h1><span>ახალი ანგარიშის შექმნა</span></div>
-            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="reg-pass" placeholder="მოიფიქრეთ პაროლი"></div>
-            <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="reg-mail" placeholder="თქვენი ელ-ფოსტა"></div>
-            <div class="gender-select">
-                <button class="gender-btn active" id="btn-male" onclick="selectGender(1)"><i class="fas fa-male"></i> კაცი</button>
-                <button class="gender-btn" id="btn-female" onclick="selectGender(2)"><i class="fas fa-female"></i> ქალი</button>
+    <div class="hud-wrapper">
+        <div class="header-top">
+            <div class="logo-container">
+                <span class="logo-code">CODE</span>
+                <span class="logo-forge">FORGE</span>
             </div>
-            <button class="submit-btn" onclick="sendRegisterData()">რეგისტრაცია</button>
-            <div class="error-msg" id="error-box"></div>
+            <div class="stats-group">
+                <div class="stat-box glass-panel">👥 <b>110</b><span>/300</span></div>
+                <div class="stat-box glass-panel">🆔 <b>21</b></div>
+            </div>
+        </div>
+
+        <div class="status-card glass-panel">
+            <div class="weapon-box">✊</div> 
+            
+            <div class="bars-container">
+                <div class="bar-wrapper">
+                    <div class="bar-fill hp-fill"></div>
+                    <span class="bar-text">85 HP</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="bar-fill armor-fill"></div>
+                    <span class="bar-text">45 AP</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="role-info">
+            <p class="role-name">Sheriff</p>
+            <p class="role-rank">Official Officer</p>
+        </div>
+
+        <div class="money-group">
+            <div class="money-box glass-panel">
+                <span class="money-icon">💳 ბანკი</span>
+                <span class="amount bank-amount">$ 55.200.186</span>
+            </div>
+
+            <div class="money-box glass-panel">
+                <span class="money-icon">💵 ხელზე</span>
+                <span class="amount cash-amount">$ 108.956</span>
+            </div>
         </div>
     </div>
 
-    <div id="skin-box">
-        <div class="content">
-            <div class="skin-title">აირჩიე პერსონაჟი</div>
-            <div class="skin-grid" id="skin-grid-container"></div>
-        </div>
-    </div>
-
-    <script>
-        let currentMoney = 0;
-        let selectedGender = 1;
-
-        const maleSkins = [7, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 28, 29];
-        const femaleSkins = [9, 10, 11, 12, 13, 31, 38, 39, 40, 41, 54, 56, 69, 93];
-
-        if (typeof cef !== 'undefined') {
-            cef.emit("game:hud:setComponentVisible", 2, false); 
-            cef.emit("game:hud:setComponentVisible", 3, false);  
-            cef.emit("game:hud:setComponentVisible", 4, false);  
-            cef.emit("game:hud:setComponentVisible", 18, false); 
-            cef.emit("game:hud:setComponentVisible", 0, false); 
-            
-            cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => { 
-                document.getElementById('money').innerText = money.toLocaleString();
-                document.getElementById('hp-fill').style.width = Math.max(0, Math.min(100, hp)) + '%'; 
-                document.getElementById('arm-fill').style.width = Math.max(0, Math.min(100, arm)) + '%';
-                let icon = '<i class="fas fa-hand-fist"></i>'; 
-                if (weapon >= 22 && weapon <= 24) icon = '<i class="fas fa-gun"></i>'; 
-                else if (weapon >= 25 && weapon <= 34) icon = '<i class="fas fa-person-rifle"></i>'; 
-                document.getElementById('w-icon').innerHTML = icon;
-                const ammoDisplay = document.querySelector('.ammo'); 
-                if(weapon === 0) { ammoDisplay.style.display = "none"; } 
-                else { ammoDisplay.style.display = "block"; document.getElementById('ammo-val').innerText = ammo; document.getElementById('ammo-total').innerText = totalammo; }
-            });
-
-            cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => { 
-                const box = document.getElementById('speedo-box');
-                if(in_veh === true || in_veh === 1 || in_veh === "1") {
-                    box.style.display = 'block'; 
-                    document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0'); 
-                    document.getElementById('fuel-val').innerText = fuel; 
-                    document.getElementById('vhp-val').innerText = Math.max(0, Math.min(100, Math.round((veh_hp - 250) / 7.5)));
-                    document.getElementById('icon-engine').style.color = (engine === 1) ? '#2ecc71' : '#e74c3c'; 
-                    document.getElementById('icon-lights').style.color = (lights === 1) ? '#f1c40f' : '#7f8c8d'; 
-                    const doorsIcon = document.getElementById('icon-doors'); 
-                    doorsIcon.className = (doors === 1) ? 'fas fa-lock' : 'fas fa-lock-open'; 
-                    doorsIcon.style.color = (doors === 1) ? '#e74c3c' : '#2ecc71';
-                } else { box.style.display = 'none'; }
-            });
-
-            cef.on("showRegisterWindow", () => {
-                document.getElementById('hud-container').style.display = 'none';
-                document.getElementById('logo-main').style.display = 'none';
-                document.getElementById('register-box').style.display = 'block';
-            });
-
-            cef.on("showSkinSelector", (gender) => {
-                document.getElementById('register-box').style.display = 'none'; 
-                document.getElementById('skin-box').style.display = 'block'; 
-                
-                const grid = document.getElementById('skin-grid-container');
-                grid.innerHTML = ''; 
-                const skinsToShow = (gender === 1) ? maleSkins : femaleSkins;
-
-                skinsToShow.forEach(skinId => {
-                    grid.innerHTML += `
-                        <div class="skin-card" onclick="selectSkin(${skinId})">
-                            <img src="https://raw.githubusercontent.com/openmultiplayer/assets/main/images/skins/${skinId}.png" onerror="this.src='http://assets.open.mp/images/skins/${skinId}.png';" alt="Skin">
-                            <button class="skin-btn">არჩევა</button>
-                        </div>
-                    `;
-                });
-            });
-
-            // ეს ფუნქცია უკვე გიწერია მოდში და რეგისტრაციის ბოლოს HUD-ს აგინთებს
-            cef.on("showHud", () => {
-                document.getElementById('register-box').style.display = 'none';
-                document.getElementById('skin-box').style.display = 'none';
-                document.getElementById('hud-container').style.display = 'flex';
-                document.getElementById('logo-main').style.display = 'block';
-                cef.emit("game:hud:setComponentVisible", 0, true); 
-            });
-        }
-
-        function selectGender(gender) {
-            selectedGender = gender;
-            document.getElementById('btn-male').classList.remove('active'); 
-            document.getElementById('btn-female').classList.remove('active');
-            if(gender === 1) document.getElementById('btn-male').classList.add('active'); 
-            else document.getElementById('btn-female').classList.add('active');
-        }
-
-        function sendRegisterData() {
-            let pass = document.getElementById('reg-pass').value;
-            let mail = document.getElementById('reg-mail').value;
-            let errorBox = document.getElementById('error-box');
-            
-            if(pass.length < 4 || pass.length > 30) { errorBox.innerText = "პაროლი უნდა იყოს 4-30 სიმბოლო!"; return; }
-            if(!mail.includes('@')) { errorBox.innerText = "მიუთითეთ სწორი ელ-ფოსტა!"; return; }
-            errorBox.innerText = "მონაცემები იგზავნება...";
-            
-            if (typeof cef !== 'undefined') { 
-                cef.emit("cef_server_onRegisterInput", pass, pass.length, mail, selectedGender); 
-            }
-        }
-
-        function selectSkin(skinId) {
-            document.getElementById('skin-box').style.display = 'none';
-            if (typeof cef !== 'undefined') {
-                cef.emit("cef_server_onSkinSelect", skinId);
-            }
-        }
-    </script>
 </body>
 </html>
