@@ -20,18 +20,24 @@
         .weapon-box { width: 50px; height: 50px; background: rgba(0,0,0,0.5); border: 1px solid var(--dark-gold); border-radius: 4px; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.1); overflow: hidden; }
         .bars-container { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
         .bar-wrapper { position: relative; height: 14px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
-        .bar-fill { height: 100%; transition: width 0.3s; }
+        
+        /* ანიმირებული ზოლები */
+        .bar-fill { height: 100%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .hp-fill { background: var(--hp-color); width: 100%; }
         .armor-fill { background: var(--armor-color); width: 0%; }
-        .bar-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; font-family: 'Orbitron', sans-serif; text-shadow: 1px 1px 2px black; }
+        
+        /* ტექსტების ანიმაციისთვის საჭიროა inline-block */
+        .bar-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; font-family: 'Orbitron', sans-serif; text-shadow: 1px 1px 2px black; display: inline-block; transition: 0.2s; }
+        .amount { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 1px; display: inline-block; transition: 0.2s; }
+        
         .role-info { text-align: right; padding: 0 5px; margin-top: -4px; margin-bottom: 4px; }
         .role-name { font-size: 16px; font-weight: bold; color: var(--main-gold); margin: 0; }
         .role-rank { font-size: 12px; color: #aaa; margin: 0; }
         .money-group { display: flex; flex-direction: column; gap: 6px; }
         .money-box { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-left: 3px solid var(--main-gold); }
-        .amount { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 1px; }
         .bank-amount { color: #a3e4d7; }
         .cash-amount { color: #82e0aa; }
+        
         #speedometer { position: absolute; bottom: 30px; right: 30px; background: rgba(0, 0, 0, 0.6); border-left: 3px solid var(--main-gold); padding: 15px 25px; transform: skewX(-15deg); display: none; flex-direction: column; gap: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; }
         .speedo-content { transform: skewX(15deg); display: flex; flex-direction: column; gap: 8px; }
         .speed-section { display: flex; align-items: baseline; gap: 5px; }
@@ -44,6 +50,39 @@
         .indicator { transition: color 0.3s; color: #7f8c8d; }
         .indicator.on { color: #2ecc71; }
         .indicator.warning { color: #e74c3c; }
+
+        /* ================= ანიმაციის გასაღებები (KEYFRAMES) ================= */
+        @keyframes flashRed {
+            0% { transform: scale(1) translate(-50%, -50%); color: inherit; }
+            50% { transform: scale(1.3) translate(-38%, -38%); color: #ff4d4d; text-shadow: 0 0 10px #ff4d4d; }
+            100% { transform: scale(1) translate(-50%, -50%); color: inherit; }
+        }
+        @keyframes flashGreen {
+            0% { transform: scale(1) translate(-50%, -50%); color: inherit; }
+            50% { transform: scale(1.3) translate(-38%, -38%); color: #2ecc71; text-shadow: 0 0 10px #2ecc71; }
+            100% { transform: scale(1) translate(-50%, -50%); color: inherit; }
+        }
+        @keyframes flashRedMoney {
+            0% { transform: scale(1); color: inherit; }
+            50% { transform: scale(1.1); color: #ff4d4d; text-shadow: 0 0 10px #ff4d4d; }
+            100% { transform: scale(1); color: inherit; }
+        }
+        @keyframes flashGreenMoney {
+            0% { transform: scale(1); color: inherit; }
+            50% { transform: scale(1.1); color: #2ecc71; text-shadow: 0 0 10px #2ecc71; }
+            100% { transform: scale(1); color: inherit; }
+        }
+        @keyframes popOut {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); color: var(--main-gold); }
+            100% { transform: scale(1); }
+        }
+
+        .anim-red-bar { animation: flashRed 0.4s ease-out; }
+        .anim-green-bar { animation: flashGreen 0.4s ease-out; }
+        .anim-red-money { animation: flashRedMoney 0.4s ease-out; }
+        .anim-green-money { animation: flashGreenMoney 0.4s ease-out; }
+        .anim-pop { animation: popOut 0.3s ease-out; display: inline-block; }
     </style>
 </head>
 <body>
@@ -59,7 +98,7 @@
 
         <div class="status-card glass-panel">
             <div class="weapon-box">
-                <img id="hud-weapon" src="weapons/0.png" style="max-width: 90%; max-height: 90%; object-fit: contain;" alt="Fist">
+                <img id="hud-weapon" src="weapons/0.png" style="max-width: 90%; max-height: 90%; object-fit: contain;" alt="W">
             </div> 
             
             <div class="bars-container">
@@ -91,26 +130,64 @@
     </div>
 
     <script>
+        // ცვლადები ძველი მნიშვნელობების შესანახად
+        let prevHp = 100, prevArmor = 0, prevCash = -1, prevBank = -1, prevOnline = -1;
+
+        // ფუნქცია ანიმაციის გასაშვებად
+        function triggerAnim(elementId, animClass) {
+            const el = document.getElementById(elementId);
+            // ვშლით ძველ ანიმაციას და ვამატებთ ახალს რომ თავიდან გაეშვას
+            el.classList.remove('anim-red-bar', 'anim-green-bar', 'anim-red-money', 'anim-green-money', 'anim-pop');
+            void el.offsetWidth; // Force Reflow (ბრაუზერს ვაიძულებთ ანიმაცია თავიდან დაიწყოს)
+            el.classList.add(animClass);
+        }
+
         if (typeof cef !== 'undefined') {
-            // მიმღები გაფართოვდა ახალი პარამეტრებით!
             cef.on("updateHUD", function(hp, armor, cash, bank, weaponid, myid, online, job, rank) {
+                
+                // HP ანიმაცია
+                if (hp < prevHp) triggerAnim('hud-hp-text', 'anim-red-bar');
+                else if (hp > prevHp) triggerAnim('hud-hp-text', 'anim-green-bar');
                 document.getElementById('hud-hp-fill').style.width = hp + '%';
                 document.getElementById('hud-hp-text').innerText = Math.round(hp) + ' HP';
+                prevHp = hp;
+
+                // Armor ანიმაცია
+                if (armor < prevArmor) triggerAnim('hud-armor-text', 'anim-red-bar');
+                else if (armor > prevArmor) triggerAnim('hud-armor-text', 'anim-green-bar');
                 document.getElementById('hud-armor-fill').style.width = armor + '%';
                 document.getElementById('hud-armor-text').innerText = Math.round(armor) + ' AP';
+                prevArmor = armor;
+
+                // ხელზე ფულის ანიმაცია
+                if (prevCash !== -1) {
+                    if (cash < prevCash) triggerAnim('hud-cash', 'anim-red-money');
+                    else if (cash > prevCash) triggerAnim('hud-cash', 'anim-green-money');
+                }
                 document.getElementById('hud-cash').innerText = '$ ' + cash.toLocaleString();
-                
-                // ახალი მონაცემები
+                prevCash = cash;
+
+                // ბანკის ფულის ანიმაცია
+                if (prevBank !== -1) {
+                    if (bank < prevBank) triggerAnim('hud-bank', 'anim-red-money');
+                    else if (bank > prevBank) triggerAnim('hud-bank', 'anim-green-money');
+                }
                 document.getElementById('hud-bank').innerText = '$ ' + bank.toLocaleString();
-                document.getElementById('hud-myid').innerText = myid;
+                prevBank = bank;
+
+                // მოთამაშეების ონლაინის ანიმაცია (Pop ეფექტი)
+                if (prevOnline !== -1 && online !== prevOnline) triggerAnim('hud-online', 'anim-pop');
                 document.getElementById('hud-online').innerText = online;
+                prevOnline = online;
+
+                // დანარჩენი მნიშვნელობები
+                document.getElementById('hud-myid').innerText = myid;
                 document.getElementById('hud-job').innerText = job;
                 document.getElementById('hud-rank').innerText = rank;
-                
-                // იარაღის სურათის ლინკის შეცვლა
                 document.getElementById('hud-weapon').src = "weapons/" + weaponid + ".png";
             });
 
+            // სპიდომეტრი
             cef.on("updateSpeedo", function(speed, fuel, veh_hp, engine, lights, doors, in_veh) {
                 const speedo = document.getElementById("speedometer");
                 if (!in_veh) { speedo.style.display = "none"; return; }
