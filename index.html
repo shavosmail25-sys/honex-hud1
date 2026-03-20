@@ -8,9 +8,9 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: transparent; }
         
-        /* === HUD და ლოგო === */
-        .server-name { position: absolute; top: 15px; right: 25px; font-family: 'Montserrat', sans-serif; font-size: 18px; background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transform: skewX(-15deg); font-weight: 900; z-index: 100; }
-        #hud-container { position: absolute; top: 50px; right: 25px; display: flex; flex-direction: column; align-items: flex-end; transform: skewX(-15deg); }
+        /* === HUD და ლოგო (თავიდან დამალულია) === */
+        .server-name { position: absolute; top: 15px; right: 25px; font-family: 'Montserrat', sans-serif; font-size: 18px; background: linear-gradient(180deg, #f1c40f 0%, #d35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transform: skewX(-15deg); font-weight: 900; z-index: 100; display: none; }
+        #hud-container { position: absolute; top: 50px; right: 25px; display: none; flex-direction: column; align-items: flex-end; transform: skewX(-15deg); }
         .money-wrapper { font-size: 32px; color: #2ecc71; text-shadow: 2px 2px 0px rgba(0,0,0,0.9); margin-bottom: 5px; transition: transform 0.2s ease, color 0.2s ease; }
         .money-update { transform: scale(1.1); color: #27ae60; }
         .stat-item { display: flex; align-items: center; margin-bottom: 5px; background: rgba(0, 0, 0, 0.5); padding: 3px 10px; }
@@ -34,16 +34,21 @@
         .speedo-stats { display: flex; gap: 20px; font-size: 15px; color: #fff; margin-bottom: 8px; }
         .speedo-indicators { display: flex; justify-content: space-between; font-size: 18px; }
 
-        /* === ფანჯრები (რეგისტრაცია და სკინები) === */
-        /* თავიდანვე დამალულია (display: none), სერვერი გამოაჩენს */
-        #register-box, #skin-box { 
+        /* === ფანჯრები === */
+        /* რეგისტრაცია თავიდანვე ჩანს (display: block) */
+        #register-box { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); 
+            background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); 
+            display: block; z-index: 9999; 
+            width: 400px; padding: 40px; border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; 
+        }
+        
+        #skin-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); 
             background: rgba(10, 10, 10, 0.95); box-shadow: 0 0 30px rgba(0,0,0,0.8); 
             display: none; z-index: 9999; 
+            width: 380px; padding: 25px; border-left: 3px solid #f1c40f; 
         }
-        
-        #register-box { width: 400px; padding: 40px; border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; }
-        #skin-box { width: 380px; padding: 25px; border-left: 3px solid #f1c40f; }
         
         .content { transform: skewX(5deg); }
         .logo-reg { text-align: center; margin-bottom: 30px; }
@@ -115,18 +120,16 @@
         let currentMoney = 0;
         let selectedGender = 1;
 
-        // სკინების სიები
         const maleSkins = [7, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 28, 29];
         const femaleSkins = [9, 10, 11, 12, 13, 31, 38, 39, 40, 41, 54, 56, 69, 93];
 
         if (typeof cef !== 'undefined') {
-            // ვმალავთ სტანდარტულ SA-MP HUD-ს
             cef.emit("game:hud:setComponentVisible", 2, false); 
             cef.emit("game:hud:setComponentVisible", 3, false);  
             cef.emit("game:hud:setComponentVisible", 4, false);  
             cef.emit("game:hud:setComponentVisible", 18, false); 
+            cef.emit("game:hud:setComponentVisible", 0, false); 
             
-            // HUD განახლება
             cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => { updateHud(money, hp, arm, weapon, ammo, totalammo); });
             cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => { updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh); });
             cef.on("updateGift", (timeStr, isVisible) => { 
@@ -135,15 +138,10 @@
                 else { giftCont.style.display = 'none'; } 
             });
 
-            // რეგისტრაციის გამოჩენა
             cef.on("showRegisterWindow", () => {
                 document.getElementById('register-box').style.display = 'block';
-                document.getElementById('hud-container').style.display = 'none';
-                document.getElementById('logo-main').style.display = 'none';
-                cef.emit("game:hud:setComponentVisible", 0, false); // ჩატის დამალვა
             });
 
-            // სკინების გამოჩენა
             cef.on("showSkinSelector", (gender) => {
                 document.getElementById('register-box').style.display = 'none'; 
                 document.getElementById('skin-box').style.display = 'block'; 
@@ -152,7 +150,6 @@
                 grid.innerHTML = ''; 
                 const skinsToShow = (gender === 1) ? maleSkins : femaleSkins;
 
-                // სურათის ჩატვირთვა უსაფრთხო წყაროდან (onerror-ით თუ გაითიშა)
                 skinsToShow.forEach(skinId => {
                     grid.innerHTML += `
                         <div class="skin-card" onclick="selectSkin(${skinId})">
@@ -163,8 +160,6 @@
                 });
             });
 
-            // ფანჯრების დამალვა სერვერიდან
-            cef.on("hideRegisterWindow", () => { document.getElementById('register-box').style.display = 'none'; });
             cef.on("hideSkinSelector", () => {
                 document.getElementById('skin-box').style.display = 'none';
                 document.getElementById('hud-container').style.display = 'flex';
@@ -172,8 +167,6 @@
                 cef.emit("game:hud:setComponentVisible", 0, true); 
             });
         }
-
-        // --- ფუნქციები (კლიკის ლოგიკა) ---
 
         function selectGender(gender) {
             selectedGender = gender;
@@ -198,18 +191,15 @@
         }
 
         function selectSkin(skinId) {
-            // ღილაკზე დაჭერისას ეგრევე ვმალავთ სკინებს და ვაბრუნებთ HUD-ს
             document.getElementById('skin-box').style.display = 'none';
             document.getElementById('hud-container').style.display = 'flex';
             document.getElementById('logo-main').style.display = 'block';
             
             if (typeof cef !== 'undefined') {
                 cef.emit("cef_server_onSkinSelect", skinId);
-                cef.emit("game:hud:setComponentVisible", 0, true); // ჩატის დაბრუნება
+                cef.emit("game:hud:setComponentVisible", 0, true); 
             }
         }
-
-        // --- HUD ლოგიკა ---
 
         function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
             const moneyElem = document.getElementById('money'); const moneyCont = document.getElementById('money-cont');
