@@ -22,20 +22,13 @@
         .ammo { font-size: 14px; color: #f39c12; }
 
         #gift-container { position: absolute; top: 15px; right: 230px; display: none; align-items: center; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(241, 196, 15, 0.4); padding: 4px 15px; border-radius: 4px; transform: skewX(-15deg); box-shadow: 0 0 20px rgba(0, 0, 0, 0.6); z-index: 101; }
-        .gift-icon { color: #f1c40f; font-size: 16px; margin-right: 10px; transform: skewX(15deg); filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5)); }
-        .gift-time { color: #fff; font-family: 'Oswald', sans-serif; font-size: 17px; font-weight: 700; transform: skewX(15deg); letter-spacing: 1px; }
         #speedo-box { position: absolute; bottom: 40px; right: 40px; display: none; background: rgba(0, 0, 0, 0.7); border-bottom: 3px solid #f1c40f; padding: 10px 20px; border-radius: 5px; transform: skewX(-5deg); }
-        .speed-row { display: flex; align-items: baseline; gap: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px; }
-        #speed-val { font-size: 45px; color: #f1c40f; font-weight: bold; line-height: 1; }
-        .speedo-label { font-size: 14px; color: #ccc; }
-        .speedo-stats { display: flex; gap: 20px; font-size: 15px; color: #fff; margin-bottom: 8px; }
-        .speedo-indicators { display: flex; justify-content: space-between; font-size: 18px; }
 
         #register-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) skewX(-5deg); 
             background: rgba(10, 10, 10, 0.95); border-top: 3px solid #f1c40f; border-bottom: 3px solid #f1c40f; 
             padding: 40px; width: 400px; box-shadow: 0 0 30px rgba(0,0,0,0.8); 
-            display: block; /* <--- გასწორდა !important-ის გარეშე */
+            display: block; 
             z-index: 9999; 
         }
         #register-box .content { transform: skewX(5deg); }
@@ -70,20 +63,13 @@
     </style>
 </head>
 <body>
-    <div id="gift-container"><div class="gift-icon"><i class="fas fa-gift"></i></div><div id="gift-val" class="gift-time">00:00:00</div></div>
+    <div id="gift-container"></div>
     <div class="server-name" id="logo-main">HONEX ROLE PLAY</div>
 
     <div id="hud-container">
-        <div class="weapon-box"><div id="w-icon" class="weapon-icon"><i class="fas fa-hand-fist"></i></div><div class="ammo"><span id="ammo-val">0</span>/<span id="ammo-total">0</span></div></div>
         <div class="money-wrapper" id="money-cont">$ <span id="money">0</span></div>
         <div class="stat-item"><div class="bar-bg"><div id="hp-fill" class="fill"></div></div></div>
         <div class="stat-item"><div class="bar-bg"><div id="arm-fill" class="fill"></div></div></div>
-    </div>
-
-    <div id="speedo-box">
-        <div class="speed-row"><div id="speed-val">000</div><div class="speedo-label">KM/H</div></div>
-        <div class="speedo-stats"><div><i class="fas fa-gas-pump" style="color:#e67e22;"></i><span id="fuel-val">100</span>L</div><div><i class="fas fa-wrench" style="color:#95a5a6;"></i><span id="vhp-val">100</span>%</div></div>
-        <div class="speedo-indicators"><i id="icon-engine" class="fas fa-car-battery" style="color:#e74c3c;"></i><i id="icon-lights" class="fas fa-lightbulb" style="color:#7f8c8d;"></i><i id="icon-doors" class="fas fa-lock-open" style="color:#2ecc71;"></i></div>
     </div>
 
     <div id="register-box">
@@ -108,29 +94,15 @@
     </div>
 
     <script>
-        let currentMoney = 0;
         let selectedGender = 1;
-
         const maleSkins = [7, 14, 15, 18, 19, 20];
         const femaleSkins = [9, 10, 11, 12, 13, 31];
 
         if (typeof cef !== 'undefined') {
-            cef.emit("game:hud:setComponentVisible", 2, false); 
-            cef.emit("game:hud:setComponentVisible", 3, false);  
-            cef.emit("game:hud:setComponentVisible", 4, false);  
-            cef.emit("game:hud:setComponentVisible", 18, false); 
-            
-            cef.on("updateHud", (money, hp, arm, weapon, ammo, totalammo) => { updateHud(money, hp, arm, weapon, ammo, totalammo); });
-            cef.on("updateSpeedo", (speed, fuel, veh_hp, engine, lights, doors, in_veh) => { updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh); });
-            cef.on("updateGift", (timeStr, isVisible) => { const giftCont = document.getElementById('gift-container'); if(isVisible) { giftCont.style.display = 'flex'; document.getElementById('gift-val').innerText = timeStr; } else { giftCont.style.display = 'none'; } });
-
             cef.on("showRegisterWindow", () => {
                 document.getElementById('register-box').style.display = 'block';
                 document.getElementById('hud-container').style.display = 'none';
                 document.getElementById('logo-main').style.display = 'none';
-                document.getElementById('gift-container').style.display = 'none';
-                document.getElementById('skin-box').style.display = 'none';
-                cef.emit("game:hud:setComponentVisible", 0, false); 
             });
 
             cef.on("showSkinSelector", (gender) => {
@@ -141,7 +113,6 @@
                 grid.innerHTML = ''; 
                 const skinsToShow = (gender === 1) ? maleSkins : femaleSkins;
 
-                // ახალი, მუშა ლინკები სკინებისთვის!
                 skinsToShow.forEach(skinId => {
                     grid.innerHTML += `
                         <div class="skin-card" onclick="selectSkin(${skinId})">
@@ -152,13 +123,6 @@
                 });
             });
 
-            cef.on("hideSkinSelector", () => {
-                document.getElementById('skin-box').style.display = 'none';
-                document.getElementById('hud-container').style.display = 'flex';
-                document.getElementById('logo-main').style.display = 'block';
-                cef.emit("game:hud:setComponentVisible", 0, true); 
-            });
-            
             cef.on("hideRegisterWindow", () => {
                 document.getElementById('register-box').style.display = 'none';
             });
@@ -166,8 +130,10 @@
 
         function selectGender(gender) {
             selectedGender = gender;
-            document.getElementById('btn-male').classList.remove('active'); document.getElementById('btn-female').classList.remove('active');
-            if(gender === 1) document.getElementById('btn-male').classList.add('active'); else document.getElementById('btn-female').classList.add('active');
+            document.getElementById('btn-male').classList.remove('active'); 
+            document.getElementById('btn-female').classList.remove('active');
+            if(gender === 1) document.getElementById('btn-male').classList.add('active'); 
+            else document.getElementById('btn-female').classList.add('active');
         }
 
         function sendRegisterData() {
@@ -175,37 +141,22 @@
             let mail = document.getElementById('reg-mail').value;
             let errorBox = document.getElementById('error-box');
             if(pass.length < 4 || pass.length > 30) { errorBox.innerText = "პაროლი 4-30 სიმბოლო!"; return; }
-            if(!mail.includes('@')) { errorBox.innerText = "არასწორი მეილი!"; return; }
             errorBox.innerText = "იგზავნება...";
-            
-            // ვაგზავნით პაროლის სიგრძესაც, რომ სერვერმა ზუსტად იცოდეს სად დაუსვას წერტილი!
-            if (typeof cef !== 'undefined') { cef.emit("cef_server_onRegisterInput", pass, pass.length, mail, selectedGender); }
-        }
-
-        function selectSkin(skinId) {
-            if (typeof cef !== 'undefined') {
-                cef.emit("cef_server_onSkinSelect", skinId);
+            if (typeof cef !== 'undefined') { 
+                // ვაგზავნით პაროლს, მის სიგრძეს და მეილს
+                cef.emit("cef_server_onRegisterInput", pass, pass.length, mail, selectedGender); 
             }
         }
 
-        function updateHud(money, hp, arm, weaponid, ammo, totalammo) {
-            const moneyElem = document.getElementById('money'); const moneyCont = document.getElementById('money-cont');
-            if (money !== currentMoney) {
-                moneyCont.classList.add('money-update'); let start = currentMoney; let end = money; let duration = 500; let startTime = null;
-                function animate(currentTime) { if (!startTime) startTime = currentTime; let progress = currentTime - startTime; let val = Math.round(start + (end - start) * (Math.min(progress / duration, 1))); moneyElem.innerText = val.toLocaleString(); if (progress < duration) { requestAnimationFrame(animate); } else { moneyElem.innerText = end.toLocaleString(); setTimeout(() => moneyCont.classList.remove('money-update'), 150); } }
-                requestAnimationFrame(animate); currentMoney = money;
-            } else { moneyElem.innerText = money.toLocaleString(); }
-            document.getElementById('hp-fill').style.width = Math.max(0, Math.min(100, hp)) + '%'; document.getElementById('arm-fill').style.width = Math.max(0, Math.min(100, arm)) + '%';
-            let icon = '<i class="fas fa-hand-fist"></i>'; if (weaponid >= 22 && weaponid <= 24) icon = '<i class="fas fa-gun"></i>'; else if (weaponid >= 25 && weaponid <= 34) icon = '<i class="fas fa-person-rifle"></i>'; document.getElementById('w-icon').innerHTML = icon;
-            const ammoDisplay = document.querySelector('.ammo'); if(weaponid === 0) { ammoDisplay.style.display = "none"; } else { ammoDisplay.style.display = "block"; document.getElementById('ammo-val').innerText = ammo; document.getElementById('ammo-total').innerText = totalammo; }
-        }
+        function selectSkin(skinId) {
+            // წამიერად ვმალავთ სკინების ფანჯარას და ვაბრუნებთ ჰუდს
+            document.getElementById('skin-box').style.display = 'none';
+            document.getElementById('hud-container').style.display = 'flex';
+            document.getElementById('logo-main').style.display = 'block';
 
-        function updateSpeedo(speed, fuel, veh_hp, engine, lights, doors, in_veh) {
-            const box = document.getElementById('speedo-box');
-            if(in_veh === true || in_veh === 1 || in_veh === "1") {
-                box.style.display = 'block'; document.getElementById('speed-val').innerText = speed.toString().padStart(3, '0'); document.getElementById('fuel-val').innerText = fuel; let hpPercent = Math.max(0, Math.min(100, Math.round((veh_hp - 250) / 7.5))); document.getElementById('vhp-val').innerText = hpPercent;
-                document.getElementById('icon-engine').style.color = (engine === 1) ? '#2ecc71' : '#e74c3c'; document.getElementById('icon-lights').style.color = (lights === 1) ? '#f1c40f' : '#7f8c8d'; const doorsIcon = document.getElementById('icon-doors'); doorsIcon.className = (doors === 1) ? 'fas fa-lock' : 'fas fa-lock-open'; doorsIcon.style.color = (doors === 1) ? '#e74c3c' : '#2ecc71';
-            } else { box.style.display = 'none'; }
+            if (typeof cef !== 'undefined') {
+                cef.emit("cef_server_onSkinSelect", skinId);
+            }
         }
     </script>
 </body>
