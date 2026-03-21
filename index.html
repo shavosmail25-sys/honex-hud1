@@ -2,148 +2,273 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <title>HONEX ROLEPLAY - HUD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HONEX RP - HUD</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,800;0,900;1,900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        :root {
+            /* მთავარი ოქროსფერი პალიტრა */
+            --main-gold: #ffcc00;
+            --dark-gold: #b38f00;
+            --glow-gold: rgba(255, 204, 0, 0.4);
+            --glass-bg: rgba(15, 15, 18, 0.85);
+            --glass-border: rgba(255, 204, 0, 0.3);
+            --hp-color: #ff4d4d; /* სიცოცხლე - წითელი */
+            --armor-color: #e6e6e6; /* ჯავშანი - თეთრი/ნაცრისფერი */
+        }
+
         html, body {
-            margin: 0; padding: 0; background: transparent !important; overflow: hidden;
-            width: 100vw; height: 100vh; font-family: 'Montserrat', sans-serif; color: white;
-            pointer-events: none; /* უშვებს კლიკებს თამაშში, მაუსი აღარ გაიჭედება! */
+            background: transparent !important;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Rajdhani', sans-serif;
+            color: white;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            height: 100vh;
+            overflow: hidden;
+            pointer-events: none; /* ეს არ აძლევს მაუსს გაჭედვის საშუალებას! */
         }
 
-        .hud-container {
-            position: absolute; top: 25px; right: 25px; width: 300px;
-            display: flex; flex-direction: column; gap: 8px;
+        /* ზომების შემცირება: სიგანე 260px */
+        .hud-wrapper {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: absolute;
+            top: 25px;
+            right: 25px;
         }
 
-        /* Header */
-        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .server-logo { font-family: 'Orbitron', sans-serif; font-weight: 900; font-style: italic; color: #ffcc00; font-size: 22px; text-shadow: 2px 2px 0px rgba(0,0,0,0.8); }
-        .online-info { display: flex; gap: 5px; }
-        .info-badge { background: rgba(15,15,15,0.85); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
 
-        .panel { background: rgba(15,15,15,0.85); border-radius: 5px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        /* === ლოგო და ზედა სტატუსი === */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 5px;
+        }
 
-        /* HP & Armor */
-        .status-panel { padding: 12px; display: flex; align-items: center; gap: 12px; }
-        .weapon-box { width: 50px; height: 50px; background: rgba(0,0,0,0.6); border-radius: 4px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,204,0,0.15); }
-        .weapon-box img { max-width: 90%; max-height: 90%; }
-        
-        .bars-container { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        .bar-row { display: flex; align-items: center; gap: 8px; }
-        .bar-icon { width: 14px; text-align: center; color: #ffcc00; font-size: 12px; }
-        .bar-bg { flex: 1; height: 10px; background: rgba(0,0,0,0.7); border-radius: 2px; position: relative; }
-        .bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
-        .hp-fill { background: #e74c3c; width: 100%; }
-        .ar-fill { background: #bdc3c7; width: 0%; }
-        .bar-text { width: 35px; text-align: right; font-size: 11px; font-weight: 800; font-family: 'Orbitron', sans-serif; }
+        .logo-container { line-height: 0.9; }
+        .logo-code { font-size: 14px; letter-spacing: 1px; color: #ccc; font-weight: 700; }
+        .logo-forge {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px; 
+            font-weight: 700;
+            color: var(--main-gold);
+            text-shadow: 0 0 8px var(--glow-gold);
+            font-style: italic;
+        }
 
-        /* Job Box */
-        .job-panel { background: linear-gradient(90deg, rgba(15,15,15,0.3) 0%, rgba(15,15,15,0.95) 100%); border-right: 4px solid #ffcc00; padding: 10px 15px; text-align: right; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .job-title { color: #ffcc00; font-weight: 900; font-size: 16px; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
-        .job-rank { color: #aaa; font-size: 11px; font-style: italic; font-weight: 600; margin: 0; margin-top: 2px; }
+        .stats-group {
+            display: flex;
+            gap: 5px;
+            font-size: 12px;
+        }
 
-        /* Money Boxes */
-        .money-panel { padding: 12px 15px; border-left: 4px solid #ffcc00; display: flex; justify-content: space-between; align-items: center; }
-        .money-label { font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-        .money-label i { color: #ffcc00; font-size: 14px; }
-        .money-val { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 16px; text-shadow: 1px 1px 2px #000; }
-        .val-bank { color: #60a5fa; }
-        .val-cash { color: #4ade80; }
+        .stat-box {
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
 
-        /* Bonus Box */
-        .bonus-panel { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; margin-top: -2px; }
-        .bonus-label { font-size: 12px; font-weight: 900; color: #ff4d4d; display: flex; align-items: center; gap: 8px; }
-        .bonus-val { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 14px; }
+        /* === იარაღი, HP და ARMOR სექცია === */
+        .status-card {
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
 
-        /* Speedometer */
-        #speedometer { position: absolute; bottom: 35px; right: 35px; transform: skewX(-12deg); display: none; }
-        .speedo-container { background: rgba(15,15,15,0.85); border-left: 5px solid #ffcc00; padding: 15px 25px 15px 40px; box-shadow: -5px 5px 15px rgba(0,0,0,0.5); }
-        .speedo-inner { transform: skewX(12deg); display: flex; flex-direction: column; align-items: flex-end; }
-        .speed-val { font-family: 'Orbitron', sans-serif; font-size: 65px; font-weight: 900; color: #ffcc00; line-height: 0.9; text-shadow: 3px 3px 0px black; }
-        .speed-unit { font-size: 14px; font-weight: 900; letter-spacing: 3px; margin-bottom: 8px; margin-top: 2px; }
-        .speedo-info { display: flex; gap: 15px; font-size: 13px; font-weight: 800; color: white; margin-bottom: 8px; }
-        .speedo-info span { display: flex; align-items: center; gap: 6px; }
-        .speedo-info i { color: #ffcc00; font-size: 12px; }
-        .speedo-icons { display: flex; gap: 12px; font-size: 15px; }
-        .icon-green { color: #2ecc71; }
-        .icon-gray { color: #7f8c8d; }
-        .icon-red { color: #e74c3c; }
+        .weapon-box {
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--dark-gold);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.1);
+        }
 
-        /* Animations */
-        @keyframes pulseRed { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #ff4d4d; } 100% { transform: scale(1); } }
-        @keyframes pulseGreen { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #2ecc71; } 100% { transform: scale(1); } }
-        .anim-red { animation: pulseRed 0.4s ease-out; }
-        .anim-green { animation: pulseGreen 0.4s ease-out; }
+        .weapon-box img { max-width: 85%; max-height: 85%; }
+
+        .bars-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .bar-wrapper {
+            position: relative;
+            height: 14px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .hp-fill { background: var(--hp-color); width: 100%; }
+        .armor-fill { background: var(--armor-color); width: 0%; }
+
+        .bar-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* პერსონაჟის ინფო */
+        .role-info {
+            text-align: right;
+            padding: 0 5px;
+            margin-top: -4px;
+            margin-bottom: 4px;
+        }
+        .role-info p { margin: 0; line-height: 1.2; }
+        .role-name { font-size: 16px; font-weight: bold; color: var(--main-gold); text-transform: uppercase; }
+        .role-rank { font-size: 12px; color: #aaa; font-style: italic; }
+
+        /* === ფულის სექცია === */
+        .money-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .money-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-left: 3px solid var(--main-gold);
+        }
+
+        .money-icon { font-size: 14px; font-weight: bold; }
+
+        .amount {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px; 
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .bank-amount { color: #a3e4d7; } 
+        .cash-amount { color: #82e0aa; } 
+        .bonus-amount { color: #ff4d4d; }
+
+        /* === სპიდომეტრი === */
+        #speedometer {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: var(--glass-bg);
+            border-left: 4px solid var(--main-gold);
+            padding: 15px 25px;
+            transform: skewX(-15deg);
+            display: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .speed-val {
+            font-size: 52px;
+            font-weight: 900;
+            color: var(--main-gold);
+            text-shadow: 3px 3px 0px black;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* ანიმაციები */
+        @keyframes flashRed { 0% { transform: scale(1); color: inherit; } 50% { transform: scale(1.15); color: #ff4d4d; } 100% { transform: scale(1); color: inherit; } }
+        @keyframes flashGreen { 0% { transform: scale(1); color: inherit; } 50% { transform: scale(1.15); color: #2ecc71; } 100% { transform: scale(1); color: inherit; } }
+        .anim-red { animation: flashRed 0.4s ease-in-out; }
+        .anim-green { animation: flashGreen 0.4s ease-in-out; }
+
     </style>
 </head>
 <body>
 
-    <div class="hud-container">
-        <div class="header-row">
-            <div class="server-logo">HONEX RP</div>
-            <div class="online-info">
-                <div class="info-badge"><i class="fas fa-users"></i> <span id="hud-online">0</span></div>
-                <div class="info-badge">ID: <span id="hud-myid">0</span></div>
+    <div class="hud-wrapper">
+        <div class="header-top">
+            <div class="logo-container">
+                <span class="logo-code">HONEX</span>
+                <span class="logo-forge">RP</span>
+            </div>
+            <div class="stats-group">
+                <div class="stat-box glass-panel">👥 <b id="hud-online">0</b></div>
+                <div class="stat-box glass-panel">🆔 <b id="hud-myid">0</b></div>
             </div>
         </div>
 
-        <div class="panel status-panel">
+        <div class="status-card glass-panel">
             <div class="weapon-box">
-                <img id="hud-weapon" src="weapons/0.png" alt="">
-            </div>
+                <img id="hud-weapon" src="weapons/0.png" alt="Weapon">
+            </div> 
+            
             <div class="bars-container">
-                <div class="bar-row">
-                    <i class="fas fa-heart bar-icon"></i>
-                    <div class="bar-bg"><div class="bar-fill hp-fill" id="hud-hp-fill"></div></div>
-                    <div class="bar-text" id="hud-hp-text">100 HP</div>
+                <div class="bar-wrapper">
+                    <div class="bar-fill hp-fill" id="hud-hp-fill"></div>
+                    <span class="bar-text" id="hud-hp-text">100 HP</span>
                 </div>
-                <div class="bar-row">
-                    <i class="fas fa-shield-halved bar-icon"></i>
-                    <div class="bar-bg"><div class="bar-fill ar-fill" id="hud-armor-fill"></div></div>
-                    <div class="bar-text" id="hud-armor-text">0 AP</div>
+                <div class="bar-wrapper">
+                    <div class="bar-fill armor-fill" id="hud-armor-fill"></div>
+                    <span class="bar-text" id="hud-armor-text">0 AP</span>
                 </div>
             </div>
         </div>
 
-        <div class="job-panel">
-            <p class="job-title" id="hud-job">CITIZEN</p>
-            <p class="job-rank" id="hud-rank">Civilian Member</p>
+        <div class="role-info">
+            <p class="role-name" id="hud-job">CITIZEN</p>
+            <p class="role-rank" id="hud-rank">Civilian Member</p>
         </div>
 
-        <div class="panel money-panel">
-            <div class="money-label"><i class="fas fa-building-columns"></i> BANK</div>
-            <div class="money-val val-bank" id="hud-bank">$ 0</div>
-        </div>
-        
-        <div class="panel money-panel">
-            <div class="money-label"><i class="fas fa-money-bill-wave" style="color:#2ecc71;"></i> CASH</div>
-            <div class="money-val val-cash" id="hud-cash">$ 0</div>
-        </div>
+        <div class="money-group">
+            <div class="money-box glass-panel">
+                <span class="money-icon"><i class="fas fa-building-columns"></i> ბანკი</span>
+                <span class="amount bank-amount" id="hud-bank">$ 0</span>
+            </div>
 
-        <div class="panel bonus-panel">
-            <div class="bonus-label"><i class="fas fa-gift"></i> BONUS</div>
-            <div class="bonus-val" id="hud-bonus">0H 00M</div>
+            <div class="money-box glass-panel">
+                <span class="money-icon"><i class="fas fa-money-bill-wave" style="color:#2ecc71;"></i> ხელზე</span>
+                <span class="amount cash-amount" id="hud-cash">$ 0</span>
+            </div>
+
+            <div class="money-box glass-panel">
+                <span class="money-icon" style="color:#ff4d4d;"><i class="fas fa-gift"></i> ბონუსი</span>
+                <span class="amount bonus-amount" id="hud-bonus">0H 00M</span>
+            </div>
         </div>
     </div>
 
     <div id="speedometer">
-        <div class="speedo-container">
-            <div class="speedo-inner">
-                <div class="speed-val" id="speed">000</div>
-                <div class="speed-unit">KM/H</div>
-                <div class="speedo-info">
-                    <span><i class="fas fa-gas-pump"></i> <span id="fuel">100</span> L</span>
-                    <span><i class="fas fa-wrench"></i> <span id="veh-hp">1000</span></span>
-                </div>
-                <div class="speedo-icons">
-                    <i class="fas fa-cogs icon-green" id="icon-engine"></i>
-                    <i class="far fa-lightbulb icon-gray" id="icon-lights"></i>
-                    <i class="fas fa-lock-open icon-red" id="icon-doors"></i>
-                </div>
+        <div style="transform: skewX(15deg); text-align:right;">
+            <div id="speed" class="speed-val">000</div>
+            <div style="font-size:14px; letter-spacing:2px; font-weight:900;">KM/H</div>
+            <div style="margin-top:10px; font-weight:800; color:#f1c40f;">
+                <i class="fas fa-gas-pump"></i> <span id="fuel">100</span>L
             </div>
         </div>
     </div>
@@ -179,7 +304,6 @@
 
                 document.getElementById('hud-armor-fill').style.width = armor + '%';
                 document.getElementById('hud-armor-text').innerText = Math.round(armor) + ' AP';
-                
                 document.getElementById('hud-myid').innerText = myid;
                 document.getElementById('hud-online').innerText = online;
                 document.getElementById('hud-job').innerText = job.toUpperCase();
@@ -191,27 +315,10 @@
                 const sp = document.getElementById("speedometer");
                 if (!in_veh) { sp.style.display = "none"; return; }
                 sp.style.display = "block";
-                
                 document.getElementById("speed").innerText = speed.toString().padStart(3, '0');
                 document.getElementById("fuel").innerText = fuel;
-                document.getElementById("veh-hp").innerText = Math.round(vhp);
-                
-                // Engine icon update
-                const engIcon = document.getElementById("icon-engine");
-                if(eng) { engIcon.className = "fas fa-cogs icon-green"; }
-                else { engIcon.className = "fas fa-cogs icon-gray"; }
-                
-                // Lights icon update
-                const lightIcon = document.getElementById("icon-lights");
-                if(light) { lightIcon.className = "fas fa-lightbulb icon-green"; }
-                else { lightIcon.className = "far fa-lightbulb icon-gray"; }
-                
-                // Doors icon update
-                const doorIcon = document.getElementById("icon-doors");
-                if(door) { doorIcon.className = "fas fa-lock icon-red"; }
-                else { doorIcon.className = "fas fa-lock-open icon-green"; }
             });
-            
+
             cef.on("updateBonus", function(timeStr) {
                 document.getElementById('hud-bonus').innerText = timeStr;
             });
