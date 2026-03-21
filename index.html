@@ -208,26 +208,6 @@
 </head>
 <body>
 
-    <div id="login-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px); z-index: 10000; justify-content: center; align-items: center; font-family: 'Rajdhani', sans-serif;">
-        <div class="glass-panel" style="width: 320px; padding: 30px; display: flex; flex-direction: column; gap: 20px; text-align: center; border-top: 4px solid var(--main-gold);">
-            <div>
-                <div style="font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; color: var(--main-gold); text-shadow: 0 0 15px var(--glow-gold); font-style: italic;">HONEX RP</div>
-                <div style="font-size: 14px; color: #bdc3c7; font-weight: 600; margin-top: 5px;">მოგესალმებით სერვერზე!</div>
-            </div>
-            
-            <div style="font-size: 22px; font-weight: 800; color: white; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 4px;" id="login-username">Player_Name</div>
-            
-            <div style="text-align: left;">
-                <label style="font-size: 13px; color: var(--main-gold); font-weight: 700;"><i class="fas fa-lock"></i> შეიყვანეთ პაროლი</label>
-                <input type="password" id="login-password" placeholder="••••••••" style="width: 100%; box-sizing: border-box; padding: 12px; margin-top: 5px; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; border-radius: 4px; outline: none; font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: bold; text-align: center;">
-            </div>
-            
-            <div style="font-size: 13px; color: #e74c3c; font-weight: 700;" id="login-attempts">დარჩენილია 4 ცდა</div>
-            
-            <button onclick="submitLogin()" style="background: linear-gradient(90deg, #b38f00, #ffcc00); border: none; padding: 12px; color: black; font-weight: 900; font-family: 'Rajdhani', sans-serif; font-size: 18px; border-radius: 4px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);">ავტორიზაცია <i class="fas fa-sign-in-alt"></i></button>
-        </div>
-    </div>
-
     <div class="hud-wrapper">
         <div class="header-top">
             <div class="logo-forge">HONEX ROLEPLAY</div>
@@ -291,42 +271,7 @@
             el.classList.add(cls);
         }
 
-        // პაროლის გაგზავნის ფუნქცია
-        function submitLogin() {
-            const pass = document.getElementById("login-password").value;
-            if(pass.length < 1) return; // თუ ცარიელია, არაფერს ვშვრებით
-
-            if (typeof cef !== 'undefined') {
-                cef.emit("server:verifyLogin", pass);
-            }
-        }
-
-        // Enter ღილაკზე დაჭერისასაც რომ გაიგზავნოს პაროლი
-        document.getElementById("login-password").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                submitLogin();
-            }
-        });
-
         if (typeof cef !== 'undefined') {
-
-            // --- ავტორიზაციის ივენთები ---
-            cef.on("showLoginPanel", function(playerName, attempts) {
-                document.getElementById("login-overlay").style.display = "flex";
-                document.getElementById("login-username").innerText = playerName;
-                document.getElementById("login-attempts").innerText = "დარჩენილია " + attempts + " ცდა";
-                
-                // ფანჯრის გახსნისთანავე ველში ვსვამთ კურსორს
-                setTimeout(() => {
-                    document.getElementById("login-password").focus();
-                }, 100);
-            });
-
-            cef.on("hideLoginPanel", function() {
-                document.getElementById("login-overlay").style.display = "none";
-                document.getElementById("login-password").value = ""; // ვასუფთავებთ ველს უსაფრთხოებისთვის
-            });
 
             // --- HUD ივენთები ---
             cef.on("updateHUD", function(hp, armor, cash, bank, weaponid, myid, online, job, rank) {
